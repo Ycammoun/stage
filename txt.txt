@@ -1,0 +1,66 @@
+Pour v´erifier que symfony est utilisable,
+
+symfony check:requirements
+
+
+Git: 
+$ git config --global user.email "gilles@l3.fr"
+$ git config --global user.name "Gilles"
+
+
+Creation
+symfony new --version=7.2 tp
+symfony console --version
+
+symfony server:start
+php -S localhost:8000 -t public
+
+symfony console cache:clear
+symfony console cache:clear --env=prod
+
+Symfony console make:controller --no-template
+
+
+symfony console debug:router --show-controllers
+
+
+mkdir database
+ # exclusion du r´epertoire des bases de donn´ees SQLite
+19 /database
+
+.env (extrait) 
+30 DATABASE_URL="sqlite:///%kernel.project_dir%/database/mybase.db"
+
+symfony console doctrine:database:create
+symfony console doctrine:schema:validate --skip-sync
+php bin/console doctrine:schema:validate
+2.4 Synchroniser Doctrine et le SGBD:
+symfony console doctrine:migrations:diff
+symfony console doctrine:migrations:diff
+
+
+symfony console make:entity
+symfony console make:user
+✞ ☎
+serveur$ symfony console doctrine:migrations:list
+serveur$ symfony console doctrine:migrations:current
+serveur$ symfony console doctrine:migrations:latest
+
+symfony console make:fixtures
+symfony console doctrine:fixtures:load
+
+
+
+symfony console make:form
+symfony console make:security:form-login
+
+EN CAS D ERREUR 
+
+rm migrations/*.php
+symfony console doctrine:migrations:version --delete --all
+symfony console doctrine:database:drop --force
+symfony console doctrine:schema:drop --force
+symfony console doctrine:database:create
+symfony console doctrine:migrations:diff
+symfony console doctrine:migrations:migrate
+

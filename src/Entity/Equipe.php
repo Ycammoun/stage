@@ -5,7 +5,7 @@ namespace App\Entity;
 use App\Repository\EquipeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+#[ORM\Table(name: 'Equipe')]
 #[ORM\Entity(repositoryClass: EquipeRepository::class)]
 class Equipe
 {
@@ -14,10 +14,10 @@ class Equipe
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255,type: Types::STRING)]
     private ?string $nom = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE,name: 'date_creation')]
     private ?\DateTime $dateCreation = null;
 
     public function getId(): ?int

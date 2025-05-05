@@ -5,7 +5,7 @@ namespace App\Entity;
 use App\Repository\PartieRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+#[ORM\Table(name: 'Match')]
 #[ORM\Entity(repositoryClass: PartieRepository::class)]
 class Partie
 {
@@ -14,19 +14,19 @@ class Partie
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE,name: 'date_match')]
     private ?\DateTime $date = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[ORM\Column(type: Types::TIME_MUTABLE,name: 'heur_debut')]
     private ?\DateTime $heurDebut = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[ORM\Column(type: Types::TIME_MUTABLE,name: 'heur_fin')]
     private ?\DateTime $heurFin = null;
 
-    #[ORM\Column]
+    #[ORM\Column(name: 'durée_pause',type: Types::INTEGER)]
     private ?int $pause = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::BOOLEAN,name: 'match_en_cours')]
     private ?bool $enCours = null;
 
     public function getId(): ?int

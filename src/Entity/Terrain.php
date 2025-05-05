@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use App\Repository\TerrainRepository;
 use Doctrine\ORM\Mapping as ORM;
-
+#[ORM\Table(name: 'Terrain')]
 #[ORM\Entity(repositoryClass: TerrainRepository::class)]
 class Terrain
 {
@@ -13,7 +13,7 @@ class Terrain
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(name: 'occupé',type: 'boolean')]
     private ?bool $estOccupé = null;
 
     #[ORM\Column(nullable: true)]
