@@ -18,8 +18,11 @@ class AppFixtures extends Fixture
             ->setPrenom('Pascal')
             ->setDateNaissance(new \DateTime('1970-01-01'))
             ->setLogin('pascalr')
-            ->setPassword('azerty');
-
+            ->setPassword('azerty')
+            ->setSexe('Homme')
+            ->setMail('mail@mail.com')
+            ->setCodepostale('86000')
+            ->setNumero('0600000000');
         $manager->flush();
     }
 }

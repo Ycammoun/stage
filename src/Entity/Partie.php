@@ -20,14 +20,28 @@ class Partie
     #[ORM\Column(type: Types::TIME_MUTABLE,name: 'heur_debut')]
     private ?\DateTime $heurDebut = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE,name: 'heur_fin')]
-    private ?\DateTime $heurFin = null;
 
-    #[ORM\Column(name: 'durée_pause',type: Types::INTEGER)]
-    private ?int $pause = null;
 
     #[ORM\Column(type: Types::BOOLEAN,name: 'match_en_cours')]
     private ?bool $enCours = null;
+
+    #[ORM\ManyToOne(inversedBy: 'matchs1')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Equipe $equipe1 = null;
+
+    #[ORM\ManyToOne(inversedBy: 'matchs2')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Equipe $equipe2 = null;
+
+    #[ORM\Column]
+    private ?int $score1 = null;
+
+    #[ORM\Column]
+    private ?int $score2 = null;
+
+    #[ORM\ManyToOne(inversedBy: 'parties')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Poule $poule = null;
 
     public function getId(): ?int
     {
@@ -58,29 +72,6 @@ class Partie
         return $this;
     }
 
-    public function getHeurFin(): ?\DateTime
-    {
-        return $this->heurFin;
-    }
-
-    public function setHeurFin(\DateTime $heurFin): static
-    {
-        $this->heurFin = $heurFin;
-
-        return $this;
-    }
-
-    public function getPause(): ?int
-    {
-        return $this->pause;
-    }
-
-    public function setPause(int $pause): static
-    {
-        $this->pause = $pause;
-
-        return $this;
-    }
 
     public function isEnCours(): ?bool
     {
@@ -90,6 +81,66 @@ class Partie
     public function setEnCours(bool $enCours): static
     {
         $this->enCours = $enCours;
+
+        return $this;
+    }
+
+    public function getEquipe1(): ?Equipe
+    {
+        return $this->equipe1;
+    }
+
+    public function setEquipe1(?Equipe $equipe1): static
+    {
+        $this->equipe1 = $equipe1;
+
+        return $this;
+    }
+
+    public function getEquipe2(): ?Equipe
+    {
+        return $this->equipe2;
+    }
+
+    public function setEquipe2(?Equipe $equipe2): static
+    {
+        $this->equipe2 = $equipe2;
+
+        return $this;
+    }
+
+    public function getScore1(): ?int
+    {
+        return $this->score1;
+    }
+
+    public function setScore1(int $score1): static
+    {
+        $this->score1 = $score1;
+
+        return $this;
+    }
+
+    public function getScore2(): ?int
+    {
+        return $this->score2;
+    }
+
+    public function setScore2(int $score2): static
+    {
+        $this->score2 = $score2;
+
+        return $this;
+    }
+
+    public function getPoule(): ?Poule
+    {
+        return $this->poule;
+    }
+
+    public function setPoule(?Poule $poule): static
+    {
+        $this->poule = $poule;
 
         return $this;
     }

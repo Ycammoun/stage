@@ -40,6 +40,26 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'date',name: 'date_naissance')]
     private ?\DateTime $dateNaissance = null;
 
+    #[ORM\Column(length: 255,name: 'mail',unique: true)]
+    private ?string $mail = null;
+
+    #[ORM\Column(length: 255,name: 'numero_de_téléphone',unique: true)]
+    private ?string $numero = null;
+
+    #[ORM\Column(length: 255,name: 'code_postal')]
+    private ?string $codepostale = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $sexe = null;
+
+    #[ORM\ManyToMany(targetEntity: Equipe::class, mappedBy: 'joueurs')]
+    private Collection $equipes;
+
+    public function __construct()
+    {
+        $this->equipes = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -145,6 +165,77 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setDateNaissance(\DateTime $dateNaissance): static
     {
         $this->dateNaissance = $dateNaissance;
+
+        return $this;
+    }
+
+    public function getMail(): ?string
+    {
+        return $this->mail;
+    }
+
+    public function setMail(string $mail): static
+    {
+        $this->mail = $mail;
+
+        return $this;
+    }
+
+    public function getNumero(): ?string
+    {
+        return $this->numero;
+    }
+
+    public function setNumero(string $numero): static
+    {
+        $this->numero = $numero;
+
+        return $this;
+    }
+
+    public function getCodepostale(): ?string
+    {
+        return $this->codepostale;
+    }
+
+    public function setCodepostale(string $codepostale): static
+    {
+        $this->codepostale = $codepostale;
+
+        return $this;
+    }
+
+    public function getSexe(): ?string
+    {
+        return $this->sexe;
+    }
+
+    public function setSexe(string $sexe): static
+    {
+        $this->sexe = $sexe;
+
+        return $this;
+    }
+    /**
+     * @return Collection<int, Equipe>
+     */
+    public function getEquipes(): Collection
+    {
+        return $this->equipes;
+    }
+
+    public function addEquipe(Equipe $equipe): static
+    {
+        if (!$this->equipes->contains($equipe)) {
+            $this->equipes->add($equipe);
+        }
+
+        return $this;
+    }
+
+    public function removeEquipe(Equipe $equipe): static
+    {
+        $this->equipes->removeElement($equipe);
 
         return $this;
     }
