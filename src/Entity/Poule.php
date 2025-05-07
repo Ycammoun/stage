@@ -27,9 +27,16 @@ class Poule
     #[ORM\OneToMany(targetEntity: Partie::class, mappedBy: 'poule')]
     private Collection $parties;
 
+    /**
+     * @var Collection<int, Equipe>
+     */
+    #[ORM\OneToMany(targetEntity: Equipe::class, mappedBy: 'poule')]
+    private Collection $equipes;
+
     public function __construct()
     {
         $this->parties = new ArrayCollection();
+        $this->equipes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -85,6 +92,36 @@ class Poule
             // set the owning side to null (unless already changed)
             if ($party->getPoule() === $this) {
                 $party->setPoule(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Equipe>
+     */
+    public function getEquipes(): Collection
+    {
+        return $this->equipes;
+    }
+
+    public function addEquipe(Equipe $equipe): static
+    {
+        if (!$this->equipes->contains($equipe)) {
+            $this->equipes->add($equipe);
+            $equipe->setPoule($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEquipe(Equipe $equipe): static
+    {
+        if ($this->equipes->removeElement($equipe)) {
+            // set the owning side to null (unless already changed)
+            if ($equipe->getPoule() === $this) {
+                $equipe->setPoule(null);
             }
         }
 

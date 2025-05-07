@@ -6,6 +6,10 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;  // Assurez-vous d'importer Collection
+
+
 #[ORM\Table(name: 'Utilisateur')]
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_LOGIN', fields: ['login'])]
@@ -52,7 +56,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $sexe = null;
 
-    #[ORM\ManyToMany(targetEntity: Equipe::class, mappedBy: 'joueurs')]
+    #[ORM\ManyToMany(targetEntity: Equipe::class, mappedBy: 'joueurs', cascade: ['persist'])]
     private Collection $equipes;
 
     public function __construct()

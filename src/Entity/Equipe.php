@@ -40,6 +40,9 @@ class Equipe
     #[ORM\OneToMany(targetEntity: Partie::class, mappedBy: 'equipe2')]
     private Collection $matchs2;
 
+    #[ORM\ManyToOne(inversedBy: 'equipes')]
+    private ?Poule $poule = null;
+
     public function __construct()
     {
         $this->joueurs = new ArrayCollection();
@@ -154,6 +157,18 @@ class Equipe
                 $matchs2->setEquipe2(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPoule(): ?Poule
+    {
+        return $this->poule;
+    }
+
+    public function setPoule(?Poule $poule): static
+    {
+        $this->poule = $poule;
 
         return $this;
     }

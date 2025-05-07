@@ -20,6 +20,12 @@ final class MainController extends AbstractController
     #[Route('/', name: 'app_main1')]
     public function index1(): Response
     {
-    return new Response('<body>Bienvenue sur notre site de l association de pickleball !</body>');
+        return $this->render('main.html.twig');
+    }
+    #[Route('/acceuil', name:'acceuil')]
+    public function acceuil(): Response
+    {
+        return $this->render('acceuil.html.twig');
     }
 }
+
