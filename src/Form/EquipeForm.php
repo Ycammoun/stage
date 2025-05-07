@@ -34,7 +34,7 @@ class EquipeForm extends AbstractType
 
             ->add('tableau', EntityType::class, [
                 'class' => Tableau::class,
-                'choice_label' => 'id',
+                'choice_label' => 'intitule',
             ])
         ;
     }

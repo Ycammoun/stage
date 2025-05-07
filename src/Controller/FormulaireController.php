@@ -62,7 +62,7 @@ final class FormulaireController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($tournoi);
             $em->flush();
-            return $this->redirectToRoute('app_main1');
+            return $this->redirectToRoute('form_addtableau');
 
         }
         if ($form->isSubmitted() && !$form->isValid()) {
@@ -89,7 +89,7 @@ final class FormulaireController extends AbstractController
 
 
 
-        return $this->render('form/form.html.twig', [
+        return $this->render('form/formTableau.html.twig', [
             'AddUserForm' => $form->createView(),
         ]);
     }

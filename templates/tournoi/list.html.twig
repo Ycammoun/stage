@@ -1,0 +1,18 @@
+<div>
+    <li>Intitulé : {{ tournoi.intitule }}</li>
+    <li>Date : {{ tournoi.date|date('Y-m-d') }}</li>
+
+    <li>Tableaux :</li>
+    <ul>
+        {% for tab in tournoi.tableaux %}
+            <ul>{{ tab.intitule }}</ul>
+            <ul>{{ tab.niveau }}</ul>
+            <ul>{{ tab.age }}</ul>
+            <ul>{{ tab.sexe }}</ul>
+
+
+
+
+        {% endfor %}
+    </ul>
+</div>

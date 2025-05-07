@@ -1,0 +1,5 @@
+{% extends 'form/form.html.twig' %}
+{% block lien %}
+    {% set urlCreateEquipe=path('form_addequipe') %}
+    <li><a href="{{ urlCreateEquipe }}">Créer une équipe</a></li>
+{% endblock %}
