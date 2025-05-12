@@ -9,6 +9,15 @@
             <ul>{{ tab.niveau }}</ul>
             <ul>{{ tab.age }}</ul>
             <ul>{{ tab.sexe }}</ul>
+            {%  for poule in tab.poules %}
+                <ul>{{  poule.numero }}</ul>
+                {% for equipe in poule.equipes %}
+                    <ul>{{  equipe.nom }}</ul>
+                {% endfor %}
+
+
+            {% endfor %}
+
 
 
 

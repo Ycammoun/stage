@@ -1,0 +1,19 @@
+<h2>Distribution des équipes</h2>
+
+{% if data.error is defined %}
+    <div class="alert alert-warning">{{ data.error }}</div>
+{% else %}
+    <p>Nombre total d'équipes : {{ data.n }}</p>
+
+    {% for repartition in data.repartitions %}
+        <div class="poule">
+            <p>{{ repartition.poules|length }} poule(s) :
+                {% for p in repartition.poules %}
+                    {{ p }} équipe(s){% if not loop.last %} / {% endif %}
+                {% endfor %}
+                => {{ repartition.nb_matchs }} match(s),
+                temps estimé : {{ repartition.temps }} min
+            </p>
+        </div>
+    {% endfor %}
+{% endif %}

@@ -1,18 +1,19 @@
 <?php
 namespace App\Service;
 
-use App\Entity\Equipe;
 use App\Entity\Tournoi;
 use Doctrine\ORM\EntityManagerInterface;
 
 class Distribution
 {
     private EntityManagerInterface $em;
+
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
-    public function distribution()
+
+    public function getRepartitions(): array
     {
         $dernierTournoi = $this->em->getRepository(Tournoi::class)->findOneBy([], ['id' => 'DESC']);
         $dernierTableaux = $dernierTournoi->getTableaux()->last();
@@ -20,71 +21,42 @@ class Distribution
         $n = $equipes->count();
 
         if ($n < 4) {
-            printf("Pas assez d'équipes (minimum 4 requises)\n");
-            return;
+            return ['error' => "Pas assez d'équipes (minimum 4 requises)"];
         }
 
-        printf("Nombre total d'équipes : %d\n", $n);
-        printf("Répartitions possibles :\n");
+        $repartitions = [];
 
-        switch ($n) {
-            case 4:
-                $this->afficherPoule([4]);
-                break;
-            case 5:
-                $this->afficherPoule([5]);
-                break;
-            case 6:
-                $this->afficherPoule([6]);
-                $this->afficherPoule([3, 3]);
-                break;
-            case 7:
-                $this->afficherPoule([4, 3]);
-                break;
-            case 8:
-                $this->afficherPoule([8]);
-                $this->afficherPoule([4, 4]);
-                break;
-            case 9:
-                $this->afficherPoule([3, 3, 3]);
-                break;
-            case 10:
-                $this->afficherPoule([5, 5]);
-                $this->afficherPoule([3, 3, 4]);
-                break;
-            case 11:
-                $this->afficherPoule([4, 4, 3]);
-                break;
-            case 12:
-                $this->afficherPoule([4, 4, 4]);
-                $this->afficherPoule([3, 3, 3, 3]);
-                break;
-            default:
-                printf("- Répartition personnalisée nécessaire pour %d équipes\n", $n);
-                break;
+        $cases = match ($n) {
+            4 => [[4]],
+            5 => [[5]],
+            6 => [[6], [3, 3]],
+            7 => [[4, 3]],
+            8 => [[8], [4, 4]],
+            9 => [[3, 3, 3]],
+            10 => [[5, 5], [3, 3, 4]],
+            11 => [[4, 4, 3]],
+            12 => [[4, 4, 4], [3, 3, 3, 3]],
+            default => []
+        };
+
+        foreach ($cases as $poules) {
+            $nbMatchs = 0;
+            foreach ($poules as $nbEquipes) {
+                $nbMatchs += $this->nbMatch($nbEquipes);
+            }
+            $tempsEstime = $nbMatchs * 10;
+            $repartitions[] = [
+                'poules' => $poules,
+                'nb_matchs' => $nbMatchs,
+                'temps' => $tempsEstime,
+            ];
         }
+
+        return ['n' => $n, 'repartitions' => $repartitions];
     }
-    private function afficherPoule(array $poules)
+
+    private function nbMatch($nbequipes): int
     {
-        $nbMatchsTotal = 0;
-        printf("- %d poule(s) : ", count($poules));
-        foreach ($poules as $i => $nbEquipes) {
-            printf("%d équipe(s)%s", $nbEquipes, $i < count($poules) - 1 ? " / " : "");
-            $nbMatchsTotal += $this->nbMatch($nbEquipes);
-        }
-        $tempsTotal = $nbMatchsTotal * 10;
-        printf(" => %d match(s), temps estimé : %d min\n", $nbMatchsTotal, $tempsTotal);
+        return ($nbequipes < 2) ? 0 : ($nbequipes * ($nbequipes - 1)) / 2;
     }
-
-
-    public function nbMatch($nbequipes)
-    {
-        if ($nbequipes < 2) {
-            return 0;
-        }
-
-        return ($nbequipes * ($nbequipes - 1)) / 2;
-
-    }
-
 }

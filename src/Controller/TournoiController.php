@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Tournoi;
+use App\Service\CreateMatche;
 use App\Service\Distribution;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -38,10 +39,24 @@ final class TournoiController extends AbstractController
         return $this->redirectToRoute('tournoi_list');
     }
     #[Route('/distribution', name: 'distribution')]
-    public function distribuer(Distribution $distribution): Response
+    public function showDistribution(Distribution $distribution): Response
     {
-        $distribution->distribution();
+        $data = $distribution->getRepartitions();
 
-        return new Response("Distribution effectuée.");
+        return $this->render('service/distribution.html.twig', [
+            'data' => $data
+        ]);
+    }
+    #[Route('/distribution/json', name: 'distribution_json')]
+    public function showDistributionJson(Distribution $distribution): JsonResponse
+    {
+        $data = $distribution->getRepartitions();
+        return $this->json($data);
+    }
+    public function createMatchesAction(EntityManagerInterface $em):Response{
+        $creatematches=new CreateMatche($em);
+        $creatematches->createMatche();
+        return new Response('done');
+
     }
 }

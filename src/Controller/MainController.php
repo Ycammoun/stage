@@ -27,5 +27,13 @@ final class MainController extends AbstractController
     {
         return $this->render('acceuil.html.twig');
     }
+    #[Route('/api/acceuil', name: 'acceuil_api')]
+    public function acceuilApi(): JsonResponse
+    {
+        // Envoie de données JSON, par exemple :
+        return new JsonResponse([
+            'message' => 'Bienvenue sur l\'API d\'accueil'
+        ]);
+    }
 }
 
