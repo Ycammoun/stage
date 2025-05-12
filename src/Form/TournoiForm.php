@@ -14,6 +14,7 @@ class TournoiForm extends AbstractType
         $builder
             ->add('date')
             ->add('intitule')
+            ->add('nbstade')
         ;
     }
 

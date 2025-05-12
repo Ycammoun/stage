@@ -25,8 +25,11 @@ class Tournoi
     /**
      * @var Collection<int, Tableau>
      */
-    #[ORM\OneToMany(targetEntity: Tableau::class, mappedBy: 'tournoi')]
+    #[ORM\OneToMany(targetEntity: Tableau::class, mappedBy: 'tournoi',cascade: [ 'remove'])]
     private Collection $tableaux;
+
+    #[ORM\Column(name: 'nombre_terrain', type: Types::INTEGER,nullable: true)]
+    private ?int $nbStade = null;
 
     public function __construct()
     {
@@ -88,6 +91,18 @@ class Tournoi
                 $tableaux->setTournoi(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNbStade(): ?int
+    {
+        return $this->nbStade;
+    }
+
+    public function setNbStade(int $nbStade): static
+    {
+        $this->nbStade = $nbStade;
 
         return $this;
     }

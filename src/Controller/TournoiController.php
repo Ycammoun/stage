@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Tournoi;
+use App\Service\Distribution;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,5 +28,20 @@ final class TournoiController extends AbstractController
         return $this->render('tournoi/list.html.twig', [
             'tournoi' => $dernierTournoi,
         ]);
+    }
+
+    #[Route('/delete/{id}', name: '_delete')]
+    public function deleteAction(EntityManagerInterface $em, int $id){
+        $tournoi = $em->getRepository(Tournoi::class)->find($id);
+        $em->remove($tournoi);
+        $em->flush();
+        return $this->redirectToRoute('tournoi_list');
+    }
+    #[Route('/distribution', name: 'distribution')]
+    public function distribuer(Distribution $distribution): Response
+    {
+        $distribution->distribution();
+
+        return new Response("Distribution effectuée.");
     }
 }
