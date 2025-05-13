@@ -1,0 +1,23 @@
+<h1>Mes matchs à venir</h1>
+
+<div class="matches-container">
+    {% for matche in matches %}
+        <div class="match-card">
+            <div class="match-info">
+                <div class="teams">
+                    <span class="team">{{ matche.equipe1.nom }}</span>
+                    <span class="score">{{ matche.score1 }} - {{ matche.score2 }}</span>
+                    <span class="team">{{ matche.equipe2.nom }}</span>
+                </div>
+                <div class="match-details">
+                    <p><strong>Date:</strong> {{ matche.date|date("d/m/Y H:i") }}</p>
+                    <p><strong>En cours:</strong> {{ matche.enCours ? 'Oui' : 'Non' }}</p>
+                    <p><strong>ID:</strong> {{ matche.id }}</p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+
+

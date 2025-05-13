@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Tournoi;
+use App\Form\CalculTournoiType;
+use App\Service\CalculTournoiService;
 use App\Service\CreateMatche;
 use App\Service\Distribution;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 #[Route('/tournoi', name: 'tournoi')]
@@ -47,16 +50,45 @@ final class TournoiController extends AbstractController
             'data' => $data
         ]);
     }
+    #[Route('/distribution1', name: '_distribution1')]
+    public function distribution(CalculTournoiService $calc, Request $request): Response
+    {
+        $form = $this->createForm(CalculTournoiType::class);
+        $form->handleRequest($request);
+
+        $resultats = null;
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $resultats = $calc->calculTournoi(
+                $data['nbJoueurs'],
+                $data['nbTableaux'],
+                $data['nbTerrains']
+            );
+        }
+
+        return $this->render('service/distribution1.html.twig', [
+            'form' => $form->createView(),
+            'resultats' => $resultats,
+        ]);
+    }
+
+
+
+
+
     #[Route('/distribution/json', name: 'distribution_json')]
     public function showDistributionJson(Distribution $distribution): JsonResponse
     {
         $data = $distribution->getRepartitions();
         return $this->json($data);
     }
+    #[Route('/creatematches', name: 'createMatches')]
     public function createMatchesAction(EntityManagerInterface $em):Response{
         $creatematches=new CreateMatche($em);
         $creatematches->createMatche();
         return new Response('done');
 
     }
+
 }

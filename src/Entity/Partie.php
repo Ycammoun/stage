@@ -14,10 +14,10 @@ class Partie
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE,name: 'date_match')]
+    #[ORM\Column(type: Types::DATE_MUTABLE,name: 'date_match',nullable: true)]
     private ?\DateTime $date = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE,name: 'heur_debut')]
+    #[ORM\Column(type: Types::TIME_MUTABLE,name: 'heur_debut',nullable: true)]
     private ?\DateTime $heurDebut = null;
 
 

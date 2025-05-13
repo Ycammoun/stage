@@ -1,0 +1,22 @@
+<h1>Calcul de tournoi</h1>
+
+{{ form_start(form) }}
+    {{ form_row(form.nbJoueurs) }}
+    {{ form_row(form.nbTableaux) }}
+    {{ form_row(form.nbTerrains) }}
+<button class="btn btn-primary">Calculer</button>
+{{ form_end(form) }}
+
+{% if resultats %}
+    <h2>Résultats :</h2>
+    <p>Nombre d'équipes par tableau : {{ resultats.n }}</p>
+
+    {% for repartition in resultats.repartitions %}
+        <div>
+            <strong>Poules :</strong> {{ repartition.poules|join(', ') }} <br>
+            <strong>Nombre de matchs :</strong> {{ repartition.nb_matchs }} <br>
+            <strong>Temps estimé :</strong> {{ repartition.temps }} minutes
+        </div>
+        <hr>
+    {% endfor %}
+{% endif %}

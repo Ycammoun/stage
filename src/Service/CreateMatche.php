@@ -22,10 +22,16 @@ class CreateMatche
                 $matche = new Partie();
                 $matche->setEquipe1($equipes[$i]);
                 $matche->setEquipe2($equipes[$j]);
+                $matche->setPoule($poule);
+                $matche->setEnCours(false);
+                $matche->setScore1(0);
+                $matche->setScore2(0);
+
                 $this->em->persist($matche);
-                $this->em->flush();
             }
         }
+        $this->em->flush();
+
     }
 
 

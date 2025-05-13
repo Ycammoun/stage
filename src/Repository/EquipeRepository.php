@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Equipe;
+use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,4 +41,19 @@ class EquipeRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    /**
+     * Récupère toutes les équipes d'un utilisateur donné.
+     *
+     * @param Utilisateur $user
+     * @return Equipe[] Retourne une liste d'équipes
+     */
+    public function findByUser(Utilisateur $user): array
+    {
+        return $this->createQueryBuilder('e')
+            ->join('e.joueurs', 'j')
+            ->where('j = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
 }
