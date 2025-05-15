@@ -4,22 +4,19 @@ namespace App\Controller;
 
 use App\Entity\Equipe;
 use App\Entity\Partie;
+use App\Form\setScoreForm;
+use App\Service\MatchDistributionService;
+use App\Service\setScore;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 #[Route('/utilisateur', name: 'utilisateur')]
 final class UtilisateurController extends AbstractController
 {
-    public function index(): JsonResponse
-    {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/UtilisateurController.php',
-        ]);
-    }
-    #[Route('/affichematches', name: 'affichematches')]
+    #[Route('/affichematches', name: '_affichematches')]
     public function affichematches(EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
@@ -60,7 +57,69 @@ final class UtilisateurController extends AbstractController
         ]);
     }
 
+    #[Route('/setScore/{idMatche}', name: '_setScore')]
+    public function setScore(EntityManagerInterface $entityManager,Request $request,int $idMatche,MatchDistributionService $redistribut): Response
+    {
+        $matche=$entityManager->getRepository(Partie::class)->find($idMatche);
+
+        $form=$this->createForm(setScoreForm::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data=$form->getData();
+
+            $setScore = new setScore($entityManager);
+            $setScore->setScore(
+                $data['score1'],
+                $data['score2'],
+                $matche,
+
+            );
+            $terrain=$matche->getTerrain();
+
+            $matche->setTerrain(NULL);
+            if ($terrain !== null) {
+                $terrain->setEstOccupé(false);
+                $entityManager->persist($terrain);
+            }
+            $entityManager->persist($matche);
+            $entityManager->flush();
+            $redistribut->distribution($matche->getPoule()->getTableau()->getTournoi());
+
+            return $this->redirectToRoute('utilisateur_affichematches');
+        }
 
 
+        return $this->render('tournoi/setScore.html.twig', ['matche' => $matche, 'form' => $form->createView(), 'message' => '']);
+    }
+    #[Route('/validerScore/{idMatche}', name: '_valider_score')]
+    public function validerScore(EntityManagerInterface $entityManager, int $idMatche): Response
+    {
+        $user = $this->getUser();
+        $matche = $entityManager->getRepository(Partie::class)->find($idMatche);
 
+        if (!$matche) {
+            throw $this->createNotFoundException("Match introuvable.");
+        }
+
+        $equipe2 = $matche->getEquipe2();
+
+        // Vérifie si l'utilisateur est bien un joueur de l'équipe 2
+        $autorise = false;
+        foreach ($equipe2->getJoueurs() as $joueur) {
+            if ($joueur === $user) {
+                $autorise = true;
+                break;
+            }
+        }
+
+        if (!$autorise) {
+            throw $this->createAccessDeniedException("Vous n'êtes pas autorisé à valider ce score.");
+        }
+
+        // Le score est validé
+        $matche->setIsValideParAdversaire(true);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('utilisateur_affichematches');
+    }
 }

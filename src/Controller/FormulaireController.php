@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Equipe;
 use App\Entity\Poule;
 use App\Entity\Tableau;
+use App\Entity\Terrain;
 use App\Entity\Tournoi;
 use App\Entity\Utilisateur;
 use App\Form\EquipeForm;
@@ -62,7 +63,18 @@ final class FormulaireController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($tournoi);
             $em->flush();
+            $nbStade = $tournoi->getNbStade();
+            for ($i=0;$i<$nbStade;$i++){
+                $terrain=new Terrain();
+                $terrain->setTournoi($tournoi);
+                $terrain->setEstOccupé(false);
+                $terrain->setNumero($i+1);
+                $em->persist($terrain);
+
+            }
+            $em->flush();
             return $this->redirectToRoute('form_addtableau');
+
 
         }
         if ($form->isSubmitted() && !$form->isValid()) {

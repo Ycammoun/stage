@@ -1,3 +1,5 @@
+{% extends 'base.html.twig' %}
+{% block body %}
 <h1>Mes matchs à venir</h1>
 
 <div class="matches-container">
@@ -13,11 +15,28 @@
                     <p><strong>Date:</strong> {{ matche.date|date("d/m/Y H:i") }}</p>
                     <p><strong>En cours:</strong> {{ matche.enCours ? 'Oui' : 'Non' }}</p>
                     <p><strong>ID:</strong> {{ matche.id }}</p>
+                    {% if app.user in matche.equipe1.joueurs %}
+                        {% set urlSetScore = path('utilisateur_setScore', {'idMatche': matche.id}) %}
+                        <a href="{{ urlSetScore }}" class="btn btn-primary">Set Score</a>
+                        {% elseif app.user in matche.equipe2.joueurs  %}
+
+                            {% if matche.score1 is not null and matche.score2 is not null %}
+                                {% if not matche.valideParAdversaire %}
+                                    <a href="{{ path('utilisateur_valider_score', {idMatche: matche.id}) }}" class="btn btn-success">
+                                        Valider le score
+                                    </a>
+                                {% else %}
+                                    <p class="text-success">Score validé</p>
+                                {% endif %}
+                            {% endif %}
+
+                    {% endif %}
                 </div>
             </div>
         </div>
     {% endfor %}
 </div>
+{% endblock%}
 
 
 

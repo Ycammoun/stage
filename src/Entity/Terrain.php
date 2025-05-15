@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TerrainRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'Terrain')]
 #[ORM\Entity(repositoryClass: TerrainRepository::class)]
@@ -21,6 +23,23 @@ class Terrain
 
     #[ORM\Column(nullable: true)]
     private ?int $largeur = null;
+
+    #[ORM\ManyToOne(inversedBy: 'terrains')]
+    private ?Tournoi $tournoi = null;
+
+    /**
+     * @var Collection<int, Partie>
+     */
+    #[ORM\OneToMany(targetEntity: Partie::class, mappedBy: 'terrain')]
+    private Collection $parties;
+
+    #[ORM\Column]
+    private ?int $numero = null;
+
+    public function __construct()
+    {
+        $this->parties = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -59,6 +78,60 @@ class Terrain
     public function setLargeur(?int $largeur): static
     {
         $this->largeur = $largeur;
+
+        return $this;
+    }
+
+    public function getTournoi(): ?Tournoi
+    {
+        return $this->tournoi;
+    }
+
+    public function setTournoi(?Tournoi $tournoi): static
+    {
+        $this->tournoi = $tournoi;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Partie>
+     */
+    public function getParties(): Collection
+    {
+        return $this->parties;
+    }
+
+    public function addParty(Partie $party): static
+    {
+        if (!$this->parties->contains($party)) {
+            $this->parties->add($party);
+            $party->setTerrain($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParty(Partie $party): static
+    {
+        if ($this->parties->removeElement($party)) {
+            // set the owning side to null (unless already changed)
+            if ($party->getTerrain() === $this) {
+                $party->setTerrain(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getNumero(): ?int
+    {
+        return $this->numero;
+    }
+
+    public function setNumero(int $numero): static
+    {
+        $this->numero = $numero;
 
         return $this;
     }

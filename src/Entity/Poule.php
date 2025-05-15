@@ -24,7 +24,7 @@ class Poule
     /**
      * @var Collection<int, Partie>
      */
-    #[ORM\OneToMany(targetEntity: Partie::class, mappedBy: 'poule')]
+    #[ORM\OneToMany(targetEntity: Partie::class, mappedBy: 'poule',cascade: ['remove'])]
     private Collection $parties;
 
     /**

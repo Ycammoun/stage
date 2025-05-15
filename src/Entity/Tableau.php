@@ -40,7 +40,7 @@ class Tableau
     /**
      * @var Collection<int, Poule>
      */
-    #[ORM\OneToMany(targetEntity: Poule::class, mappedBy: 'tableau')]
+    #[ORM\OneToMany(targetEntity: Poule::class, mappedBy: 'tableau',cascade: ['remove', 'persist'])]
     private Collection $poules;
 
     public function __construct()

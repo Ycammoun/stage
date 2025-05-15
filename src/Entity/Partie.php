@@ -43,6 +43,12 @@ class Partie
     #[ORM\JoinColumn(nullable: false)]
     private ?Poule $poule = null;
 
+    #[ORM\Column(nullable: true,name: 'valide')]
+    private ?bool $isValideParAdversaire = null;
+
+    #[ORM\ManyToOne(inversedBy: 'parties')]
+    private ?Terrain $terrain = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -141,6 +147,30 @@ class Partie
     public function setPoule(?Poule $poule): static
     {
         $this->poule = $poule;
+
+        return $this;
+    }
+
+    public function isValideParAdversaire(): ?bool
+    {
+        return $this->isValideParAdversaire;
+    }
+
+    public function setIsValideParAdversaire(?bool $isValideParAdversaire): static
+    {
+        $this->isValideParAdversaire = $isValideParAdversaire;
+
+        return $this;
+    }
+
+    public function getTerrain(): ?Terrain
+    {
+        return $this->terrain;
+    }
+
+    public function setTerrain(?Terrain $terrain): static
+    {
+        $this->terrain = $terrain;
 
         return $this;
     }

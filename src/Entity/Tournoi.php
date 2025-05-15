@@ -31,9 +31,18 @@ class Tournoi
     #[ORM\Column(name: 'nombre_terrain', type: Types::INTEGER,nullable: true)]
     private ?int $nbStade = null;
 
+    /**
+     * @var Collection<int, Terrain>
+     */
+    #[ORM\OneToMany(targetEntity: Terrain::class, mappedBy: 'tournoi')]
+    private Collection $terrains;
+
+
+
     public function __construct()
     {
         $this->tableaux = new ArrayCollection();
+        $this->terrains = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -106,4 +115,36 @@ class Tournoi
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Terrain>
+     */
+    public function getTerrains(): Collection
+    {
+        return $this->terrains;
+    }
+
+    public function addTerrain(Terrain $terrain): static
+    {
+        if (!$this->terrains->contains($terrain)) {
+            $this->terrains->add($terrain);
+            $terrain->setTournoi($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTerrain(Terrain $terrain): static
+    {
+        if ($this->terrains->removeElement($terrain)) {
+            // set the owning side to null (unless already changed)
+            if ($terrain->getTournoi() === $this) {
+                $terrain->setTournoi(null);
+            }
+        }
+
+        return $this;
+    }
+
+
 }

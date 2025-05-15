@@ -2,11 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\Partie;
+use App\Entity\Poule;
 use App\Entity\Tournoi;
 use App\Form\CalculTournoiType;
 use App\Service\CalculTournoiService;
 use App\Service\CreateMatche;
 use App\Service\Distribution;
+use App\Service\MatchDistributionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -40,6 +43,24 @@ final class TournoiController extends AbstractController
         $em->remove($tournoi);
         $em->flush();
         return $this->redirectToRoute('tournoi_list');
+    }
+    #[Route('/deletepoule', name: '_deletepoule')]
+    public function deletepouleAction(EntityManagerInterface $em){
+        $poules=$em->getRepository(Poule::class)->findAll();
+        foreach ($poules as $poule){
+            $em->remove($poule);
+        }
+        $em->flush();
+        return $this->redirectToRoute('tournoi_list');
+    }
+    #[Route('/deletematches', name: '_deletematches')]
+    public function deletematchesAction(EntityManagerInterface $em){
+        $matches=$em->getRepository(Partie::class)->findAll();
+        foreach ($matches as $match){
+            $em->remove($match);
+        }
+        $em->flush();
+
     }
     #[Route('/distribution', name: 'distribution')]
     public function showDistribution(Distribution $distribution): Response
@@ -84,11 +105,21 @@ final class TournoiController extends AbstractController
         return $this->json($data);
     }
     #[Route('/creatematches', name: 'createMatches')]
-    public function createMatchesAction(EntityManagerInterface $em):Response{
-        $creatematches=new CreateMatche($em);
-        $creatematches->createMatche();
-        return new Response('done');
+    public function createMatchesAction(
+        EntityManagerInterface $em,
+        CreateMatche $creatematches,
+        MatchDistributionService $distributionMatch
+    ): Response {
+        $tournoi = $em->getRepository(Tournoi::class)->findOneBy([], ['id' => 'DESC']);
 
+        if (!$tournoi) {
+            return new Response('Aucun tournoi trouvé.', 404);
+        }
+
+        $creatematches->createMatche($tournoi);
+        $distributionMatch->distribution($tournoi);
+
+        return new Response('Les matchs ont été générés et distribués.');
     }
 
 }
