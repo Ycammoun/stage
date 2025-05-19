@@ -47,6 +47,8 @@ class Partie
     private ?bool $isValideParAdversaire = null;
 
     #[ORM\ManyToOne(inversedBy: 'parties')]
+    #[ORM\JoinColumn(nullable: true)]
+
     private ?Terrain $terrain = null;
 
     public function getId(): ?int

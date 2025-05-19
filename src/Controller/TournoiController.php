@@ -10,6 +10,7 @@ use App\Service\CalculTournoiService;
 use App\Service\CreateMatche;
 use App\Service\Distribution;
 use App\Service\MatchDistributionService;
+use App\Service\Win;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -121,5 +122,22 @@ final class TournoiController extends AbstractController
 
         return new Response('Les matchs ont été générés et distribués.');
     }
+    #[Route('/gagnant/{id}', name: 'gagnant')]
+    public function gagnantAction(Win $win, EntityManagerInterface $entityManager,int $id):Response{
+
+        $poule=$entityManager->getRepository(Poule::class)->find($id);
+        $gagnant=$win->win($poule);
+        dump($gagnant);
+        return $this->render('tournoi/gagnant.html.twig', [
+            'gagnant' => $gagnant,
+            'poule'=>$poule
+        ]);
+    }
+
+
+
+
+
+
 
 }

@@ -77,6 +77,8 @@ final class UtilisateurController extends AbstractController
             $terrain=$matche->getTerrain();
 
             $matche->setTerrain(NULL);
+            $matche->setEnCours(false); // <-- ligne manquante ici !
+
             if ($terrain !== null) {
                 $terrain->setEstOccupé(false);
                 $entityManager->persist($terrain);
