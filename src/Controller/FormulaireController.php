@@ -24,6 +24,52 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/form', name: 'form')]
 final class FormulaireController extends AbstractController
 {
+    #[Route(path: '/api/adduser', name: 'api_adduser', methods: ['POST'])]
+    public function apiUserAdd(
+        EntityManagerInterface $em,
+        Request $request,
+        UserPasswordHasherInterface $passwordHasher
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return new JsonResponse(['error' => 'Données JSON invalides'], 400);
+        }
+
+        // Validation des champs obligatoires
+        if (empty($data['mail']) || empty($data['password']) || empty($data['login'])) {
+            return new JsonResponse(['error' => 'mail, login et password sont requis.'], 400);
+        }
+
+        // Validation champ sexe (optionnel, mais si présent, doit être dans la liste)
+        $validSexes = ['Homme', 'Femme', 'Autre', 'Non renseigné'];
+        $sexe = $data['sexe'] ?? null;
+        if ($sexe !== null && !in_array($sexe, $validSexes, true)) {
+            return new JsonResponse(['error' => 'Valeur de sexe invalide'], 400);
+        }
+
+        $user = new Utilisateur();
+        $user->setLogin($data['login']);
+        $user->setNom($data['nom'] ?? null);
+        $user->setPrenom($data['prenom'] ?? null);
+        $user->setDateNaissance(!empty($data['dateNaissance']) ? new \DateTime($data['dateNaissance']) : null);
+        $user->setMail($data['mail']);
+        $user->setNumero($data['numero'] ?? null);
+        $user->setCodepostale($data['codepostale'] ?? null);
+        $user->setSexe($sexe);
+
+        // Hash du mot de passe
+        $user->setPassword(
+            $passwordHasher->hashPassword($user, $data['password'])
+        );
+
+        $user->setRoles(['ROLE_JOUEUR']);
+
+        $em->persist($user);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Utilisateur ajouté avec succès !'], 201);
+    }
     #[Route(path: '/adduser', name: '_adduser')]
     public function userAddAction(
         EntityManagerInterface $em,

@@ -27,8 +27,8 @@ class UtilisateurForm extends AbstractType
             ->add('codepostale')
             ->add('sexe', ChoiceType::class, [
                 'choices' => [
-                    'Homme' => 'homme',
-                    'Femme' => 'femme',
+                    'Homme' => 'Homme',
+                    'Femme' => 'Femme',
                 ],
                 'expanded' => false, // liste déroulante
                 'multiple' => false, // un seul choix possible

@@ -12,6 +12,7 @@ Creation
 symfony new --version=7.2 tp
 symfony console --version
 
+php -S 0.0.0.0:8000 -t public
 symfony server:start
 php -S localhost:8000 -t public
 

@@ -9,3 +9,7 @@
 /vendor/
 ###< symfony/framework-bundle ###
 /database
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###

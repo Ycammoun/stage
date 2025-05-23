@@ -13,13 +13,30 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        api_login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                check_path: /api/login
+                username_path: login
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern: ^/utilisateur/api
+            stateless: true
+            provider: app_user_provider
+            jwt: ~
         main:
             lazy: true
             provider: app_user_provider
             form_login:
                 login_path: app_login
                 check_path: app_login
-                enable_csrf: true
+
+                enable_csrf: false
                 default_target_path: acceuil
             logout:
                 path: app_logout
@@ -35,6 +52,15 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/utilisateur/api, roles: IS_AUTHENTICATED_FULLY } # ✅ Ajout à faire ici
+
+
+        # Pour le reste des /api, authentification obligatoire
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
+
+
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
