@@ -34,7 +34,7 @@ class Tournoi
     /**
      * @var Collection<int, Terrain>
      */
-    #[ORM\OneToMany(targetEntity: Terrain::class, mappedBy: 'tournoi')]
+    #[ORM\OneToMany(targetEntity: Terrain::class, mappedBy: 'tournoi',cascade: ['remove'])]
     private Collection $terrains;
 
 

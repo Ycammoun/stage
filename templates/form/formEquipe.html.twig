@@ -1,0 +1,5 @@
+{% extends 'form/form.html.twig' %}
+{% block lien %}
+    {% set urlCreatepoule=path('form_addpoule') %}
+    <li><a href="{{ urlCreatepoule }}">Créer une poule</a></li>
+{% endblock %}

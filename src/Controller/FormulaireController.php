@@ -100,57 +100,82 @@ final class FormulaireController extends AbstractController
         ]);
     }
     #[Route(path: '/addtournoi', name: '_addtournoi')]
-    public function addTournoiAction(EntityManagerInterface $em,Request $request): Response
+    public function addTournoiAction(EntityManagerInterface $em, Request $request): Response
     {
         $tournoi = new Tournoi();
         $form = $this->createForm(TournoiForm::class, $tournoi);
-        $form->add('submit', SubmitType::class,['label'=>'Add Tournoi']);
+        $form->add('submit', SubmitType::class, ['label' => 'Add Tournoi']);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($tournoi);
             $em->flush();
-            $nbStade = $tournoi->getNbStade();
-            for ($i=0;$i<$nbStade;$i++){
-                $terrain=new Terrain();
-                $terrain->setTournoi($tournoi);
-                $terrain->setEstOccupé(false);
-                $terrain->setNumero($i+1);
-                $em->persist($terrain);
 
+            // Création des terrains
+            $nbStade = $tournoi->getNbStade();
+            for ($i = 0; $i < $nbStade; $i++) {
+                $terrain = new Terrain();
+                $terrain->setTournoi($tournoi);
+                $terrain->setEstOccupé(false);  // attention au nom méthode, sans accent ici !
+                $terrain->setNumero($i + 1);
+                $em->persist($terrain);
             }
             $em->flush();
-            return $this->redirectToRoute('form_addtableau');
 
-
+            // Ici, au lieu de rediriger, on continue et affiche le tournoi
+            // Le formulaire est vide ou tu peux choisir de ne plus l'afficher après la soumission.
+            return $this->render('form/form.html.twig', [
+                'addTournoiForm' => $form->createView(),
+                'tournoi' => $tournoi,
+                'showDetails' => true, // optionnel, pour dire au twig d’afficher ou non le formulaire
+            ]);
         }
+
         if ($form->isSubmitted() && !$form->isValid()) {
             $this->addFlash('error', 'Le formulaire est invalide.');
-
         }
 
         return $this->render('form/form.html.twig', [
-            'AddUserForm' => $form->createView(),
+            'addTournoiForm' => $form->createView(),
+            'tournoi' => null,  // Pas encore créé
+            'showDetails' => false,
         ]);
     }
-    #[Route(path: '/addtableau', name: '_addtableau')]
-    public function addtableauAction(EntityManagerInterface $entityManager,Request $request): Response
-    {
+
+    #[Route(path: '/addtableau/{tournoiId}', name: '_addtableau')]
+    public function addtableauAction(
+        EntityManagerInterface $entityManager,
+        Request $request,
+        int $tournoiId
+    ): Response {
+        // Récupérer le tournoi par son ID
+        $tournoi = $entityManager->getRepository(Tournoi::class)->find($tournoiId);
+        if (!$tournoi) {
+            throw $this->createNotFoundException('Tournoi non trouvé');
+        }
+
         $tableau = new Tableau();
+        $tableau->setTournoi($tournoi); // Lier le tableau au tournoi
+
         $form = $this->createForm(TableauForm::class, $tableau);
-        $form->add('submit', SubmitType::class,['label'=>'Add Tableau']);
+        $form->add('submit', SubmitType::class, ['label' => 'Add Tableau']);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($tableau);
             $entityManager->flush();
 
+            // Optionnel : tu peux rediriger vers la même page pour éviter la soumission multiple
+            return $this->redirectToRoute('_addtableau', ['tournoiId' => $tournoiId]);
         }
 
-
-
-        return $this->render('form/formTableau.html.twig', [
-            'AddUserForm' => $form->createView(),
+        return $this->render('form/form.html.twig', [
+            'addTabForm' => $form->createView(),
+            'tournoi' => $tournoi,
+            'showDetails' => true,
         ]);
     }
+
     #[Route(path: '/addequipe', name: '_addequipe')]
     public function addEquipeAction(EntityManagerInterface $entityManager,Request $request): Response
     {
@@ -164,7 +189,7 @@ final class FormulaireController extends AbstractController
             $entityManager->flush();
 
         }
-        return $this->render('form/form.html.twig', [
+        return $this->render('form/formEquipe.html.twig', [
             'AddUserForm' => $form->createView(),
         ]);
     }
@@ -179,10 +204,89 @@ final class FormulaireController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->render('form/form.html.twig',[
+        return $this->render('form/formpoule.html.twig',[
             'AddUserForm'=>$form->createView(),
         ]);
     }
+    #[Route(path: '/gestiontournoi', name: 'gestiontournoi')]
+    public function gestionTournoi(Request $request, EntityManagerInterface $em): Response
+    {
+        // Création d’un nouveau tournoi
+        $nouveauTournoi = new Tournoi();
+        $formTournoi = $this->createForm(TournoiForm::class, $nouveauTournoi);
+        $formTournoi->handleRequest($request);
+
+        if ($formTournoi->isSubmitted() && $formTournoi->isValid()) {
+            $em->persist($nouveauTournoi);
+
+            $nbStade = $nouveauTournoi->getNbStade();
+            for ($i = 0; $i < $nbStade; $i++) {
+                $terrain = new Terrain();
+                $terrain->setTournoi($nouveauTournoi);
+                $terrain->setEstOccupé(false);  // attention au nom méthode, sans accent ici !
+                $terrain->setNumero($i + 1);
+                $em->persist($terrain);
+            }
+            $em->flush();
+            return $this->redirectToRoute('formgestiontournoi', ['tournoiId' => $nouveauTournoi->getId()]);
+        }
+
+        // Récupération du tournoi sélectionné
+        $tournoiId = $request->query->get('tournoiId');
+        $tournoi = $tournoiId ? $em->getRepository(Tournoi::class)->find($tournoiId) : null;
+
+        // Formulaire d’ajout de tableau
+        $tableau = new Tableau();
+        $formTableau = $this->createForm(TableauForm::class, $tableau);
+        $formTableau->handleRequest($request);
+
+        if ($tournoi && $formTableau->isSubmitted() && $formTableau->isValid()) {
+            $tableau->setTournoi($tournoi);
+            $em->persist($tableau);
+            $em->flush();
+            return $this->redirectToRoute('formgestiontournoi', ['tournoiId' => $tournoi->getId()]);
+        }
+
+        // Formulaires d’ajout de poule (un par tableau)
+        $pouleForms = [];
+
+        if ($tournoi) {
+            foreach ($tournoi->getTableaux() as $tableauItem) {
+                $poule = new Poule();
+                $form = $this->createForm(PouleForm::class, $poule, [
+                    'action' => $this->generateUrl('formgestiontournoi', [
+                        'tournoiId' => $tournoi->getId(),
+                        'tableauId' => $tableauItem->getId(),
+                    ])
+                ]);
+
+                // Si on est sur le tableau ciblé dans la requête (soumission)
+                if ($request->query->get('tableauId') == $tableauItem->getId()) {
+                    $form->handleRequest($request);
+
+                    if ($form->isSubmitted() && $form->isValid()) {
+                        $poule->setTableau($tableauItem);
+                        $em->persist($poule);
+                        $em->flush();
+                        return $this->redirectToRoute('formgestiontournoi', ['tournoiId' => $tournoi->getId()]);
+                    }
+                }
+
+                $pouleForms[$tableauItem->getId()] = $form->createView();
+            }
+        }
+
+        return $this->render('form/gestion.html.twig', [
+            'formTournoi' => $formTournoi->createView(),
+            'formTableau' => $formTableau->createView(),
+            'formPoule' => $pouleForms,
+            'tournoi' => $tournoi,
+        ]);
+    }
+
+
+
+
 
 
 

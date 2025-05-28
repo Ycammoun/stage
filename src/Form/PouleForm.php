@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Equipe;
 use App\Entity\Poule;
 use App\Entity\Tableau;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -22,11 +23,17 @@ class PouleForm extends AbstractType
                 'multiple' => true,
                 'expanded' => true,
                 'by_reference' => false,
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('e')
+                        ->leftJoin('e.poule', 'p')
+                        ->where('p IS NULL');
+                },
+
             ])
-            ->add('tableau', EntityType::class, [
+            /*->add('tableau', EntityType::class, [
                 'class' => Tableau::class,
-                'choice_label' => 'id',
-            ])
+                'choice_label' => 'intitule',
+            ])*/
         ;
     }
 

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Gestion des Tableaux </title>
+    <style>
+        #resultat {
+            display: flex;
+            flex-wrap: wrap;
+
+        }
+
+        .tableau-wrapper {
+            display: flex;
+            align-items: flex-start;
+            border: 1px solid #ccc;
+            max-width: 350px; /* réduit de 600px à 350px */
+            max-height: 100px;
+margin-bottom: 10px;
+        }
+
+        .slider-container {
+            min-width: 130px;
+            max-width: 160px;
+            padding: 3px 5px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tableau-result {
+            flex-shrink: 0;
+            padding-left: 8px;
+            width: auto;
+            max-width: 180px; /* réduit la largeur max */
+        }
+
+        select {
+            font-size: 7px;
+            padding: 3px;
+            width: 100%;
+            max-width: 280px; /* réduit la largeur max */
+        }
+        .tableau-wrapper {
+            display: flex;
+            align-items: center; /* Centrer verticalement les éléments */
+            border: 1px solid #ccc;
+            max-width: 350px;
+            max-height: 50px; /* plus petit comme demandé */
+            font-size: 10px;
+        }
+
+        .slider-container {
+            min-width: 130px;
+            padding: 3px 5px;
+            margin: 0; /* enlever marges verticales */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slider-container h3,
+        .slider-container label {
+            margin: 0 0 2px 0; /* réduire les marges verticales */
+            padding: 0;
+        }
+
+        .tableau-result {
+            flex-shrink: 0;
+            padding-left: 8px;
+            width: 180px;
+            max-width: 180px;
+            font-size: 10px;
+            display: flex;
+            justify-content: center; /* centre horizontalement le select */
+            align-items: center;
+        }
+
+        select {
+            font-size: 9px;
+            padding: 3px;
+            width: 120px; /* fixe une largeur plus petite */
+            max-width: 120px;
+            margin: 0 auto; /* centre horizontalement */
+            display: block;
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+
+
+<div style="display: flex; gap: 20px; margin-bottom: 15px;">
+    <div class="slider-container">
+        <label for="nbTableaux">Nombre de tableaux : <span id="val-nbTableaux">1</span></label><br>
+        <input type="range" id="nbTableaux" min="1" max="10" value="1" />
+    </div>
+
+    <div class="slider-container">
+        <label for="nbTerrains">Nombre de terrains : <span id="val-nbTerrains">1</span></label><br>
+        <input type="range" id="nbTerrains" min="1" max="20" value="1" />
+    </div>
+</div>
+<div id="tableaux-container"></div>
+
+<div id="resultat"></div>
+<div id="resumeTournoi" style="margin-top: 20px; font-weight: bold;"></div>
+
+<script>
+    const nbTableauxInput = document.getElementById('nbTableaux');
+    const nbTableauxValue = document.getElementById('val-nbTableaux');
+    const tableauxContainer = document.getElementById('tableaux-container');
+    const nbTerrainsInput = document.getElementById('nbTerrains');
+    const nbTerrainsValue = document.getElementById('val-nbTerrains');
+    const resultatDiv = document.getElementById('resultat');
+    const resumeTournoiDiv = document.getElementById('resumeTournoi');
+
+    let tableauData = [];
+
+    // Met à jour l'affichage du slider nombre de terrains
+    nbTerrainsInput.addEventListener('input', () => {
+        nbTerrainsValue.textContent = nbTerrainsInput.value;
+        calculEtAffiche();
+    });
+
+    // Met à jour l'affichage du slider nombre de tableaux + génère sliders des équipes
+    function updateTableaux() {
+        const nbTableaux = parseInt(nbTableauxInput.value);
+        nbTableauxValue.textContent = nbTableaux;
+
+        tableauxContainer.innerHTML = '';
+
+        tableauData = [];
+
+        for (let i = 1; i <= nbTableaux; i++) {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('tableau-wrapper');
+
+            const sliderDiv = document.createElement('div');
+            sliderDiv.classList.add('slider-container');
+            sliderDiv.innerHTML = `
+                <h3>Tableau ${i}</h3>
+                <label for="equipes-${i}">Nombre d’équipes : <span id="val-equipes-${i}">4</span></label><br>
+                <input type="range" id="equipes-${i}" min="1" max="64" value="4" />
+            `;
+
+            wrapper.appendChild(sliderDiv);
+
+            const tableauResultDiv = document.createElement('div');
+            tableauResultDiv.classList.add('tableau-result');
+            tableauResultDiv.id = `tableau-result-${i}`;
+            wrapper.appendChild(tableauResultDiv);
+
+            tableauxContainer.appendChild(wrapper);
+
+            // Initial data
+            tableauData.push({
+                tableau: i,
+                nb_equipes: 4,
+                repartitions: [],
+                selection: 0
+            });
+
+            // Ajout écouteur sur ce slider d'équipes
+            const equipesInput = sliderDiv.querySelector(`#equipes-${i}`);
+            const valEquipesSpan = sliderDiv.querySelector(`#val-equipes-${i}`);
+
+            equipesInput.addEventListener('input', () => {
+                valEquipesSpan.textContent = equipesInput.value;
+                tableauData[i - 1].nb_equipes = parseInt(equipesInput.value);
+                calculEtAffiche();
+            });
+        }
+    }
+
+    // Fonction calcul et création des répartitions
+    function calculTournoi(equipesParTableau, nbTerrains) {
+        const resultat = [];
+
+        equipesParTableau.forEach((nbEquipes, index) => {
+            const repartitions = [];
+            let cases = [];
+
+            switch (nbEquipes) {
+                case 4: cases = [[4]]; break;
+                case 5: cases = [[5]]; break;
+                case 6: cases = [[6], [3, 3]]; break;
+                case 7: cases = [[4, 3]]; break;
+                case 8: cases = [[8], [4, 4]]; break;
+                case 9: cases = [[3, 3, 3]]; break;
+                case 10: cases = [[5, 5], [3, 3, 4]]; break;
+                case 11: cases = [[4, 4, 3]]; break;
+                case 12: cases = [[4, 4, 4], [3, 3, 3, 3]]; break;
+                default: cases = []; break;
+            }
+
+            for (const poules of cases) {
+                let nbMatchs = 0;
+                poules.forEach(n => {
+                    nbMatchs += (n < 2) ? 0 : (n * (n - 1)) / 2;
+                });
+                const temps = Math.ceil(nbMatchs / nbTerrains) * 10;
+
+                repartitions.push({
+                    poules: poules,
+                    nb_matchs: nbMatchs,
+                    temps: temps
+                });
+            }
+
+            resultat.push({
+                tableau: index + 1,
+                nb_equipes: nbEquipes,
+                repartitions: repartitions,
+                selection: 0
+            });
+        });
+
+        return resultat;
+    }
+
+    // Affiche les propositions dans un select pour chaque tableau
+    function afficherResultatsParTableau(result) {
+        result.forEach((tableauData) => {
+            const container = document.getElementById(`tableau-result-${tableauData.tableau}`);
+            container.innerHTML = '';
+
+            if (tableauData.repartitions.length === 0) {
+                container.textContent = 'Aucune proposition disponible';
+                return;
+            }
+
+            const select = document.createElement('select');
+            select.id = `select-repartition-${tableauData.tableau}`;
+
+            tableauData.repartitions.forEach((rep, idx) => {
+                const option = document.createElement('option');
+                option.value = idx;
+                option.textContent = `${rep.poules.join(' + ')} - ${rep.nb_matchs} matchs - ${rep.temps} min`;
+                select.appendChild(option);
+            });
+
+            select.value = tableauData.selection ?? 0;
+
+            select.addEventListener('change', e => {
+                tableauData.selection = parseInt(e.target.value);
+                afficherResumeTournoi(result);
+            });
+
+            container.appendChild(select);
+        });
+    }
+
+    // Affiche temps total selon choix sélectionnés
+    function afficherResumeTournoi(result) {
+        let tempsTotal = 0;
+        result.forEach(tableau => {
+            if (tableau.repartitions.length === 0) return;
+            const idx = tableau.selection ?? 0;
+            const temps = tableau.repartitions[idx]?.temps ?? 0;
+            tempsTotal += temps;
+        });
+        resumeTournoiDiv.textContent = `Temps total du tournoi : ${tempsTotal} minutes`;
+    }
+
+    // Fonction principale : calcule + affiche
+    function calculEtAffiche() {
+        const nbTerrains = parseInt(nbTerrainsInput.value);
+        const equipesParTableau = tableauData.map(t => t.nb_equipes);
+
+        const result = calculTournoi(equipesParTableau, nbTerrains);
+
+        // Récupérer anciennes sélections si possible
+        result.forEach(r => {
+            const ancienne = tableauData.find(t => t.tableau === r.tableau);
+            if (ancienne) {
+                // Conserver la sélection si valide
+                if (ancienne.selection < r.repartitions.length) {
+                    r.selection = ancienne.selection;
+                }
+            }
+        });
+
+        tableauData = result;
+
+        afficherResultatsParTableau(result);
+        afficherResumeTournoi(result);
+    }
+
+    // Événements initiaux
+    nbTableauxInput.addEventListener('input', () => {
+        updateTableaux();
+        calculEtAffiche();
+    });
+
+    // Slider terrains
+    nbTerrainsInput.addEventListener('input', calculEtAffiche);
+
+    // Initialisation
+    updateTableaux();
+    calculEtAffiche();
+</script>
+
+</body>
+</html>

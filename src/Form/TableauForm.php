@@ -38,10 +38,7 @@ class TableauForm extends AbstractType
                 'expanded' => false, // liste déroulante
                 'multiple' => false, // un seul choix possible
             ])
-            ->add('tournoi', EntityType::class, [
-                'class' => Tournoi::class,
-                'choice_label' => 'intitule',
-            ])
+
         ;
     }
 

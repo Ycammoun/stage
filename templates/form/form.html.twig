@@ -1,2 +1,37 @@
-{{ form(AddUserForm) }}
-{% block lien %}{% endblock %}
+
+
+{% block extra %}
+    {{ form(addTournoiForm) }}
+{% endblock %}
+
+{% block extratab %}
+    {% if addTabForm is defined %}
+        {{ form(addTabForm) }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    {% if tournoi is not null %}
+        <div>
+            <li>Intitulé : {{ tournoi.intitule }}</li>
+            <li>Date : {{ tournoi.date|date('Y-m-d') }}</li>
+
+            <li>Tableaux :</li>
+            <ul>
+                {% for tab in tournoi.tableaux %}
+                    <ul>{{ tab.intitule }}</ul>
+                    <ul>{{ tab.niveau }}</ul>
+                    <ul>{{ tab.age }}</ul>
+                    <ul>{{ tab.sexe }}</ul>
+                    {% for poule in tab.poules %}
+                        <ul>{{ poule.numero }}</ul>
+                        {% for equipe in poule.equipes %}
+                            <ul>{{ equipe.nom }}</ul>
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <p>Aucun tournoi à afficher.</p>
+    {% endif %}
+{% endblock %}

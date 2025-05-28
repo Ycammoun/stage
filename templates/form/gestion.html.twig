@@ -1,0 +1,55 @@
+<h1>Gestion du Tournoi</h1>
+
+<h2>Créer un nouveau tournoi</h2>
+{{ form_start(formTournoi) }}
+    {{ form_widget(formTournoi) }}
+<button type="submit">Créer le tournoi</button>
+{{ form_end(formTournoi) }}
+
+{% if tournoi %}
+    <h2>Tournoi : {{ tournoi.intitule }}</h2>
+
+    <h3>Ajouter un tableau</h3>
+    {{ form_start(formTableau) }}
+    {{ form_widget(formTableau) }}
+    <button type="submit">Ajouter le tableau</button>
+    {{ form_end(formTableau) }}
+
+    <h3>Tableaux existants</h3>
+    {% for tableau in tournoi.tableaux %}
+        <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">
+            <strong>Tableau : {{ tableau.intitule }} ({{ tableau.niveau }})</strong>
+
+            {% if tableau.poules|length > 0 %}
+                <ul>
+                    {% for poule in tableau.poules %}
+                        <li>
+                            Poule {{ poule.numero }} :
+                            {% if poule.equipes|length > 0 %}
+                                <ul>
+                                    {% for equipe in poule.equipes %}
+                                        <li>{{ equipe.nom }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <em>Aucune équipe</em>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Aucune poule pour ce tableau.</p>
+            {% endif %}
+
+            <h4>Ajouter une poule à ce tableau</h4>
+            {{ form_start(formPoule[tableau.id]) }}
+            {{ form_widget(formPoule[tableau.id]) }}
+            <button type="submit">Ajouter la poule</button>
+            {{ form_end(formPoule[tableau.id]) }}
+        </div>
+    {% endfor %}
+{% endif %}
+{% block lien %}
+    {% set urlCreatematches=path('tournoi_createMatches') %}
+    <li><a href="{{ urlCreatematches }}">Créer les matches et lancer le tournoi</a></li>
+{% endblock %}

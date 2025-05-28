@@ -1,3 +1,4 @@
+{% block content %}
 <div>
     <li>Intitulé : {{ tournoi.intitule }}</li>
     <li>Date : {{ tournoi.date|date('Y-m-d') }}</li>
@@ -25,3 +26,4 @@
         {% endfor %}
     </ul>
 </div>
+{% endblock %}

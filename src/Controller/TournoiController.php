@@ -94,6 +94,12 @@ final class TournoiController extends AbstractController
             'resultats' => $resultats,
         ]);
     }
+    #[Route('/distribution2', name: '_distribution2')]
+    public function indexx(): Response
+    {
+        return $this->render('tournoi/index.html.twig');
+    }
+
 
 
 
@@ -105,7 +111,7 @@ final class TournoiController extends AbstractController
         $data = $distribution->getRepartitions();
         return $this->json($data);
     }
-    #[Route('/creatematches', name: 'createMatches')]
+    #[Route('/creatematches', name: '_createMatches')]
     public function createMatchesAction(
         EntityManagerInterface $em,
         CreateMatche $creatematches,

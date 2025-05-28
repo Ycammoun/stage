@@ -1,0 +1,5 @@
+{% extends 'form/form.html.twig' %}
+{% block lien %}
+    {% set urlCreatematches=path('tournoi_createMatches') %}
+    <li><a href="{{ urlCreatematches }}">Créer les matches et lancer le tournoi</a></li>
+{% endblock %}

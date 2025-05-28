@@ -3,10 +3,12 @@
 <p>Bienvenue sur notre site de l association de pickleball !</p>
 
 <div>
-    {%  set urlCreateTournoi=path('form_addtournoi')%}
-    {% set urlSuggestion=path('tournoi_distribution1') %}
+    {%  set urlCreateTournoi=path('formgestiontournoi')%}
+    {% set urlSuggestion=path('tournoi_distribution2') %}
+    {% set urladdequipe=path('form_addequipe') %}
     <li><a href="{{ urlCreateTournoi }}">Creer un nouveau tournoi</a></li>
     <li><a href="{{ urlSuggestion }}">Estimez la durée du tournois</a></li>
+    <li><a href="{{ urladdequipe }}" >Ajouter une equipe</a></li>
 
 </div>
 </body>
