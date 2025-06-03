@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Tournoi;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -15,6 +16,11 @@ class TournoiForm extends AbstractType
             ->add('date')
             ->add('intitule')
             ->add('nbstade')
+            ->add('fichier', FileType::class, [
+                'label' => 'Fichier CSV',
+                'mapped' => false, // important : ce champ n'est pas lié à une entité
+                'required' => true,
+        ])
         ;
     }
 

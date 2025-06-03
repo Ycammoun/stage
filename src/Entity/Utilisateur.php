@@ -59,6 +59,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Equipe::class, mappedBy: 'joueurs', cascade: ['persist'])]
     private Collection $equipes;
 
+    #[ORM\Column(nullable: true)]
+    private ?string $dupr = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $fft = null;
+
     public function __construct()
     {
         $this->equipes = new ArrayCollection();
@@ -243,4 +249,27 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getDupr(): ?string
+    {
+        return $this->dupr;
+    }
+
+    public function setDupr(?string $dupr): static
+    {
+        $this->dupr = $dupr;
+        return $this;
+    }
+
+    public function getFft(): ?string
+    {
+        return $this->fft;
+    }
+
+    public function setFft(?string $fft): static
+    {
+        $this->fft = $fft;
+        return $this;
+    }
+
 }

@@ -18,17 +18,24 @@
     <h3>Tableaux existants</h3>
     {% for tableau in tournoi.tableaux %}
         <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">
+            {% set urlsuppressionTab = path('tournoi_deletetableau', { 'id': tableau.id }) %}
+
             <strong>Tableau : {{ tableau.intitule }} ({{ tableau.niveau }})</strong>
+            <a href="{{ urlsuppressionTab }}">supprimer ce tableau </a>
+
 
             {% if tableau.poules|length > 0 %}
                 <ul>
                     {% for poule in tableau.poules %}
+                        {% set urlsuppressionPoule = path('tournoi_deletepoule', { 'id': poule.id }) %}
+
                         <li>
-                            Poule {{ poule.numero }} :
+                            Poule {{ poule.numero }} :<a href="{{ urlsuppressionPoule }}">supprimer cette poule</a>
                             {% if poule.equipes|length > 0 %}
                                 <ul>
                                     {% for equipe in poule.equipes %}
                                         <li>{{ equipe.nom }}</li>
+
                                     {% endfor %}
                                 </ul>
                             {% else %}

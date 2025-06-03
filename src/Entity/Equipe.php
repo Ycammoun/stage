@@ -43,6 +43,9 @@ class Equipe
     #[ORM\ManyToOne(inversedBy: 'equipes')]
     private ?Poule $poule = null;
 
+    #[ORM\ManyToOne(inversedBy: 'equipes')]
+    private ?Tournoi $tournoi = null;
+
     public function __construct()
     {
         $this->joueurs = new ArrayCollection();
@@ -169,6 +172,18 @@ class Equipe
     public function setPoule(?Poule $poule): static
     {
         $this->poule = $poule;
+
+        return $this;
+    }
+
+    public function getTournoi(): ?Tournoi
+    {
+        return $this->tournoi;
+    }
+
+    public function setTournoi(?Tournoi $tournoi): static
+    {
+        $this->tournoi = $tournoi;
 
         return $this;
     }

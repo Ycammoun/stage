@@ -37,12 +37,19 @@ class Tournoi
     #[ORM\OneToMany(targetEntity: Terrain::class, mappedBy: 'tournoi',cascade: ['remove'])]
     private Collection $terrains;
 
+    /**
+     * @var Collection<int, Equipe>
+     */
+    #[ORM\OneToMany(targetEntity: Equipe::class, mappedBy: 'tournoi',cascade: ['remove'])]
+    private Collection $equipes;
+
 
 
     public function __construct()
     {
         $this->tableaux = new ArrayCollection();
         $this->terrains = new ArrayCollection();
+        $this->equipes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -140,6 +147,36 @@ class Tournoi
             // set the owning side to null (unless already changed)
             if ($terrain->getTournoi() === $this) {
                 $terrain->setTournoi(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Equipe>
+     */
+    public function getEquipes(): Collection
+    {
+        return $this->equipes;
+    }
+
+    public function addEquipe(Equipe $equipe): static
+    {
+        if (!$this->equipes->contains($equipe)) {
+            $this->equipes->add($equipe);
+            $equipe->setTournoi($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEquipe(Equipe $equipe): static
+    {
+        if ($this->equipes->removeElement($equipe)) {
+            // set the owning side to null (unless already changed)
+            if ($equipe->getTournoi() === $this) {
+                $equipe->setTournoi(null);
             }
         }
 

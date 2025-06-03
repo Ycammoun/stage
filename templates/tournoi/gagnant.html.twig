@@ -1,7 +1,11 @@
-<h1>Le gagnant de la poule {{ poule.id }}</h1>
+<h1>Gagnant{{ gagnant|length > 1 ? 's' : '' }} de la poule {{ poule.id }}</h1>
 
-{% if gagnant %}
-    <p>{{ gagnant.nom }}</p>
+{% if gagnant is not empty %}
+    <ul>
+        {% for equipe in gagnant %}
+            <li>{{ equipe.nom }}</li>
+        {% endfor %}
+    </ul>
 {% else %}
     <p>Aucun gagnant déterminé pour cette poule.</p>
 {% endif %}

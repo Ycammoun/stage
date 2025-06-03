@@ -15,7 +15,7 @@ class TableauForm extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('intitule')
+            //->add('intitule')
             ->add('niveau', ChoiceType::class, [
                 'choices' => [
                     'N1' => '1',

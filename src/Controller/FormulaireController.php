@@ -13,9 +13,11 @@ use App\Form\PouleForm;
 use App\Form\TableauForm;
 use App\Form\TournoiForm;
 use App\Form\UtilisateurForm;
+use App\Service\EquipeCsvImporter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -162,12 +164,29 @@ final class FormulaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Conversions explicites en string
+            $niveau = (string) $tableau->getNiveau(); // ex: '1'
+            $age = (string) $tableau->getAge();       // ex: '19'
+            $sexe = (string) $tableau->getSexe();     // ex: 'homme'
+            if (!$niveau || !$age || !$sexe) {
+                throw new \Exception('Erreur de récupération des valeurs du formulaire');
+            }
+
+            // Construction de l’intitulé
+            $niveauLabel = 'N' . $niveau;
+            $ageLabel = '+' . $age;
+            $sexeLabel = strtoupper(substr($sexe, 0, 1)); // H ou F
+
+            $intitule = $niveauLabel . $ageLabel . $sexeLabel; // ex: N1+19H
+            $tableau->setIntitule($intitule);
+
+
             $entityManager->persist($tableau);
             $entityManager->flush();
 
-            // Optionnel : tu peux rediriger vers la même page pour éviter la soumission multiple
             return $this->redirectToRoute('_addtableau', ['tournoiId' => $tournoiId]);
         }
+
 
         return $this->render('form/form.html.twig', [
             'addTabForm' => $form->createView(),
@@ -209,7 +228,7 @@ final class FormulaireController extends AbstractController
         ]);
     }
     #[Route(path: '/gestiontournoi', name: 'gestiontournoi')]
-    public function gestionTournoi(Request $request, EntityManagerInterface $em): Response
+    public function gestionTournoi(Request $request, EntityManagerInterface $em,EquipeCsvImporter $importer): Response
     {
         // Création d’un nouveau tournoi
         $nouveauTournoi = new Tournoi();
@@ -227,6 +246,16 @@ final class FormulaireController extends AbstractController
                 $terrain->setNumero($i + 1);
                 $em->persist($terrain);
             }
+
+            // ✅ Récupération du fichier CSV
+            /** @var UploadedFile $csvFile */
+            $csvFile = $formTournoi->get('fichier')->getData();
+            if ($csvFile) {
+                $tempPath = $csvFile->getPathname(); // chemin temporaire du fichier
+                $importer->importbis($tempPath,$nouveauTournoi); // appelle ton service
+            }
+
+
             $em->flush();
             return $this->redirectToRoute('formgestiontournoi', ['tournoiId' => $nouveauTournoi->getId()]);
         }
@@ -242,6 +271,15 @@ final class FormulaireController extends AbstractController
 
         if ($tournoi && $formTableau->isSubmitted() && $formTableau->isValid()) {
             $tableau->setTournoi($tournoi);
+
+            // Construire l’intitulé
+            $niveauLabel = 'N' . $tableau->getNiveau();
+            $ageLabel = '+' . $tableau->getAge();
+            $sexeLabel = strtoupper(substr($tableau->getSexe(), 0, 1));
+            $intitule = $niveauLabel . $ageLabel . $sexeLabel;
+
+            $tableau->setIntitule($intitule);
+
             $em->persist($tableau);
             $em->flush();
             return $this->redirectToRoute('formgestiontournoi', ['tournoiId' => $tournoi->getId()]);
@@ -254,6 +292,8 @@ final class FormulaireController extends AbstractController
             foreach ($tournoi->getTableaux() as $tableauItem) {
                 $poule = new Poule();
                 $form = $this->createForm(PouleForm::class, $poule, [
+                    'tournoi' => $tournoi, // 👈 passe le tournoi ici
+
                     'action' => $this->generateUrl('formgestiontournoi', [
                         'tournoiId' => $tournoi->getId(),
                         'tableauId' => $tableauItem->getId(),

@@ -14,71 +14,109 @@ class Win
         $this->em = $entityManager;
     }
 
-    public function win(Poule $poule): ?Equipe
-    {
-        $matchs = $poule->getMatchs();
-        $victoires = []; // [idEquipe => ['equipe' => Equipe, 'victoires' => int, 'match' => Match]]
 
-        foreach ($matchs as $match) {
+    public function win(int $idPoule): array
+    {
+        $victoires = [];
+        $poule = $this->em->getRepository(Poule::class)->find($idPoule);
+
+        if (!$poule) {
+            throw new \Exception("Poule non trouvée");
+        }
+
+        foreach ($poule->getParties() as $match) {
+            $equipe1 = $match->getEquipe1();
+            $equipe2 = $match->getEquipe2();
             $score1 = $match->getScore1();
             $score2 = $match->getScore2();
 
-            if ($score1 === null || $score2 === null) {
-                continue; // match non joué
+            foreach ([$equipe1, $equipe2] as $equipe) {
+                $id = $equipe->getId();
+                if (!isset($victoires[$id])) {
+                    $victoires[$id] = [
+                        'equipe' => $equipe,
+                        'victoires' => 0,
+                        'ptsMarques' => 0,
+                        'ptsEncaisses' => 0,
+                    ];
+                }
             }
 
             if ($score1 > $score2) {
-                $gagnant = $match->getEquipe1();
-                $scoreAdversaire = $score2;
+                $victoires[$equipe1->getId()]['victoires']++;
             } elseif ($score2 > $score1) {
-                $gagnant = $match->getEquipe2();
-                $scoreAdversaire = $score1;
-            } else {
-                continue; // match nul
+                $victoires[$equipe2->getId()]['victoires']++;
             }
 
-            $id = $gagnant->getId();
+            $victoires[$equipe1->getId()]['ptsMarques'] += $score1;
+            $victoires[$equipe1->getId()]['ptsEncaisses'] += $score2;
+            $victoires[$equipe2->getId()]['ptsMarques'] += $score2;
+            $victoires[$equipe2->getId()]['ptsEncaisses'] += $score1;
+        }
 
-            if (!isset($victoires[$id])) {
-                $victoires[$id] = [
-                    'equipe' => $gagnant,
-                    'victoires' => 1,
-                    'match' => $match,
-                    'scoreAdversaire' => $scoreAdversaire
-                ];
-            } else {
-                $victoires[$id]['victoires']++;
+        // Regrouper les équipes par nombre de victoires
+        $groupesParVictoires = [];
+        foreach ($victoires as $stat) {
+            $nbVictoire = $stat['victoires'];
+            $groupesParVictoires[$nbVictoire][] = $stat;
+        }
 
-                // Si ce match a un adversaire avec un score plus bas, on garde ce match
-                if ($scoreAdversaire < $victoires[$id]['scoreAdversaire']) {
-                    $victoires[$id]['match'] = $match;
-                    $victoires[$id]['scoreAdversaire'] = $scoreAdversaire;
-                }
+        // Trier chaque groupe par critères supplémentaires
+        krsort($groupesParVictoires); // Pour traiter d'abord les meilleurs
+
+        foreach ($groupesParVictoires as &$groupe) {
+            if (count($groupe) > 1) {
+                usort($groupe, function ($a, $b) use ($poule) {
+                    $diffA = $a['ptsMarques'] - $a['ptsEncaisses'];
+                    $diffB = $b['ptsMarques'] - $b['ptsEncaisses'];
+
+                    if ($diffB !== $diffA) {
+                        return $diffB <=> $diffA;
+                    }
+
+                    if ($b['ptsMarques'] !== $a['ptsMarques']) {
+                        return $b['ptsMarques'] <=> $a['ptsMarques'];
+                    }
+
+                    // Cas d'égalité parfaite — on regarde le match direct
+                    $idA = $a['equipe']->getId();
+                    $idB = $b['equipe']->getId();
+
+                    foreach ($poule->getParties() as $match) {
+                        $e1 = $match->getEquipe1()->getId();
+                        $e2 = $match->getEquipe2()->getId();
+
+                        if (
+                            ($e1 === $idA && $e2 === $idB) ||
+                            ($e1 === $idB && $e2 === $idA)
+                        ) {
+                            $s1 = $match->getScore1();
+                            $s2 = $match->getScore2();
+
+                            if ($e1 === $idA) {
+                                return $s2 <=> $s1; // plus grand score gagne
+                            } else {
+                                return $s1 <=> $s2;
+                            }
+                        }
+                    }
+
+                    return 0; // égalité parfaite
+                });
+            }
+        }
+        unset($groupe); // bonne pratique
+
+        // Aplatir le tableau
+        $gagnants = [];
+        foreach ($groupesParVictoires as $groupe) {
+            foreach ($groupe as $stat) {
+                $gagnants[] = $stat['equipe'];
             }
         }
 
-        if (empty($victoires)) {
-            return null; // aucun gagnant
-        }
-
-        $maxVictoires = max(array_column($victoires, 'victoires'));
-
-        $exaequo = array_filter($victoires, fn($v) => $v['victoires'] === $maxVictoires);
-
-        if (count($exaequo) === 1) {
-            return array_values($exaequo)[0]['equipe'];
-        } else {
-            $meilleurEquipe = null;
-            $minScoreAdversaire = PHP_INT_MAX;
-
-            foreach ($exaequo as $data) {
-                if ($data['scoreAdversaire'] < $minScoreAdversaire) {
-                    $minScoreAdversaire = $data['scoreAdversaire'];
-                    $meilleurEquipe = $data['equipe'];
-                }
-            }
-
-            return $meilleurEquipe;
-        }
+        return $gagnants;
     }
+
+
 }

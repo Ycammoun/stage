@@ -1,0 +1,27 @@
+<h1>Poules du tournoi {{ tournoi.id }}</h1>
+
+{% for poule in poules %}
+
+    <h2>Poule {{ loop.index }}</h2>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+        <tr>
+            <th>Équipe 1</th>
+            <th>Score Équipe 1</th>
+            <th>Score Équipe 2</th>
+            <th>Équipe 2</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for match in poule.parties %}
+
+            <tr>
+                <td>{{ match.equipe1.nom }}</td>
+                <td>{{ match.score1 }}</td>
+                <td>{{ match.score2 }}</td>
+                <td>{{ match.equipe2.nom }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
