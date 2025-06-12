@@ -101,7 +101,7 @@ class EquipeCsvImporter
             $equipe->setNom("{$joueur1->getNom()} - {$joueur2->getNom()}");
             $equipe->addJoueur($joueur1);
             $equipe->addJoueur($joueur2);
-            $equipe->setTournoi($tournoi); // 👈 associe l'équipe au tournoi donné
+            $equipe->setTournoi($tournoi); //
 
             $this->em->persist($equipe);
         }
@@ -125,7 +125,7 @@ class EquipeCsvImporter
             $user->setMail($data['email']);
             $user->setNumero($data['tel']);
 
-            // Valeurs par défaut obligatoires
+            // valeurs par défaut obligatoires
             $user->setLogin($data['email']);
             $user->setRoles(['ROLE_JOUEUR']);
             $user->setCodepostale('00000');

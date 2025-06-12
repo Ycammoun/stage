@@ -34,12 +34,11 @@ final class UtilisateurController extends AbstractController
         $matches = [];
 
         foreach ($equipes as $equipe) {
-            // Ajoute les matchs de l'équipe 1
             foreach ($equipe->getMatchs1() as $match) {
                 $matches[] = $match;
             }
 
-            // Ajoute les matchs de l'équipe 2
+
             foreach ($equipe->getMatchs2() as $match) {
                 $matches[] = $match;
             }
@@ -48,7 +47,7 @@ final class UtilisateurController extends AbstractController
         // Supprimer les doublons en comparant les ids des matchs
         $uniqueMatches = [];
         foreach ($matches as $match) {
-            $uniqueMatches[$match->getId()] = $match; // On utilise l'id comme clé
+            $uniqueMatches[$match->getId()] = $match;
         }
 
         // Les valeurs du tableau $uniqueMatches contiennent les matchs sans doublon
@@ -93,7 +92,6 @@ final class UtilisateurController extends AbstractController
             }
         }
 
-        // Formatage des données pour le JSON
         $matchesArray = array_map(function ($match) {
             return [
                 'id' => $match->getId(),
@@ -224,7 +222,6 @@ final class UtilisateurController extends AbstractController
             throw $this->createAccessDeniedException("Vous n'êtes pas autorisé à valider ce score.");
         }
 
-        // Le score est validé
         $matche->setIsValideParAdversaire(true);
         $entityManager->flush();
 
@@ -243,7 +240,7 @@ final class UtilisateurController extends AbstractController
                 foreach ($poule->getEquipes() as $equipe) {
                     $equipesArray[] = [
                         'id' => $equipe->getId(),
-                        'nom' => $equipe->getNom(), // ⚠️ vérifier que cette méthode existe
+                        'nom' => $equipe->getNom(),
                     ];
                 }
 

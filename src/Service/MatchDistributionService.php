@@ -36,7 +36,7 @@ class MatchDistributionService
 
                     $this->em->persist($match);
                     $this->em->persist($terrain);
-                    break; // on passe au match suivant
+                    break;
                 }
             }
         }

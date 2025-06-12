@@ -41,7 +41,7 @@ class PouleForm extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Poule::class,
-            'tournoi' => null, // 👈 option personnalisée autorisée ici
+            'tournoi' => null, //
         ]);
     }
 }

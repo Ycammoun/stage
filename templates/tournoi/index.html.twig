@@ -254,8 +254,9 @@
             const temps = tableau.repartitions[idx]?.temps ?? 0;
             tempsTotal += temps;
         });
-        resumeTournoiDiv.textContent = `Temps total du tournoi : ${tempsTotal} minutes`;
-    }
+        const heures = Math.floor(tempsTotal / 60);
+        const minutes = tempsTotal % 60;
+        resumeTournoiDiv.textContent = `Temps total du tournoi : ${heures} heure${heures > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;    }
 
     function calculEtAffiche() {
         const nbTerrains = parseInt(nbTerrainsInput.value);

@@ -23,7 +23,6 @@ class CreateMatche
             $poules = $tab->getPoules();
 
             foreach ($poules as $poule) {
-                // Conversion explicite en tableau indexé pour éviter les problèmes d'index
                 $equipes = $poule->getEquipes()->toArray();
                 $n = count($equipes);
 
@@ -46,7 +45,6 @@ class CreateMatche
 
         $this->em->flush();
 
-        // Pour debug : afficher le nombre total de matchs créés (à retirer en prod)
-        // echo "Total matchs créés : " . $totalMatchsCrees . PHP_EOL;
+
     }
 }

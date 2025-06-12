@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Equipe;
 use App\Entity\Partie;
 use App\Entity\Poule;
 use App\Entity\Tableau;
@@ -179,6 +180,89 @@ final class TournoiController extends AbstractController
             'poule'=>$poule
         ]);
     }
+    #[Route('/gagnant/{id}', name: 'gagnant')]
+    public function generateTournament(Win $win, EntityManagerInterface $entityManager, int $id): Response
+    {
+        $poule = $entityManager->getRepository(Poule::class)->find($id);
+        if (!$poule) {
+            throw $this->createNotFoundException('Poule non trouvée');
+        }
+
+        $gagnant = $win->win($poule->getId());
+
+        // On attend exactement 5 équipes
+        if (count($gagnant) === 5) {
+            $m1 = new Partie();
+            $m1->setEquipe1($gagnant[3]);
+            $m1->setEquipe2($gagnant[4]);
+            $m1->setPoule($poule);
+            $m1->setEnCours(false);
+            $m1->setScore1(1); // valeur fictive pour test
+            $m1->setScore2(0);
+            $m1->setIsValideParAdversaire(true); // à ajuster selon logique
+
+            $m2 = new Partie();
+            $m2->setEquipe1($gagnant[1]);
+            $m2->setEquipe2($gagnant[2]);
+            $m2->setPoule($poule);
+            $m2->setEnCours(false);
+            $m2->setScore1(1);
+            $m2->setScore2(0);
+            $m2->setIsValideParAdversaire(true);
+
+            $entityManager->persist($m1);
+            $entityManager->persist($m2);
+
+            if ($m1->isValideParAdversaire()) {
+                $m3 = new Partie();
+                $m3->setEquipe1($gagnant[0]);
+                $m3->setEquipe2($this->getGagnant($m1));
+                $m3->setPoule($poule);
+                $m3->setEnCours(false);
+                $m3->setScore1(1);
+                $m3->setScore2(0);
+                $m3->setIsValideParAdversaire(true);
+
+                $entityManager->persist($m3);
+            }
+
+            if (isset($m3) && $m3->isValideParAdversaire()) {
+                $m4 = new Partie();
+                $m4->setEquipe1($this->getGagnant($m3));
+                $m4->setEquipe2($this->getGagnant($m2));
+                $m4->setPoule($poule);
+                $m4->setEnCours(false);
+                $m4->setScore1(1);
+                $m4->setScore2(0);
+                $m4->setIsValideParAdversaire(true);
+
+                $entityManager->persist($m4);
+            }
+
+            $entityManager->flush();
+        }
+
+        return $this->render('tournoi/gagnant.html.twig', [
+            'gagnant' => $gagnant,
+            'poule' => $poule,
+            'm1' => $m1 ?? null,
+            'm2' => $m2 ?? null,
+            'm3' => $m3 ?? null,
+            'm4' => $m4 ?? null,
+        ]);
+    }
+
+    /**
+     * Retourne l'équipe gagnante d'une partie (à ajuster selon ta logique réelle)
+     */
+    private function getGagnant(Partie $partie): ?Equipe
+    {
+        if ($partie->getScore1() > $partie->getScore2()) {
+            return $partie->getEquipe1();
+        }
+        return $partie->getEquipe2();
+    }
+
     #[Route('/affichepoules/{id}', name: '_affichepoules')]
     public function affichePoulesAction(int $id,EntityManagerInterface $em):Response{
         $tournoi = $em->getRepository(Tournoi::class)->find($id);
@@ -188,7 +272,6 @@ final class TournoiController extends AbstractController
 
         foreach ($tabs as $tab) {
             foreach ($tab->getPoules() as $poule) {
-                // ✅ forcer le chargement des parties
                 $poule->getParties()->toArray();
                 $poules[] = $poule;
             }

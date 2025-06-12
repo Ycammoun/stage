@@ -18,7 +18,7 @@ class TournoiForm extends AbstractType
             ->add('nbstade')
             ->add('fichier', FileType::class, [
                 'label' => 'Fichier CSV',
-                'mapped' => false, // important : ce champ n'est pas lié à une entité
+                'mapped' => false,
                 'required' => true,
         ])
         ;

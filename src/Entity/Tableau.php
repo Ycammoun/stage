@@ -18,8 +18,8 @@ class Tableau
     #[ORM\Column(length: 255)]
     private ?string $intitule = null;
 
-    #[ORM\Column]
-    private ?int $niveau = null;
+    #[ORM\Column(type: 'float')]
+    private ?float $niveau = null;
 
     #[ORM\Column]
     private ?int $age = null;
@@ -66,12 +66,12 @@ class Tableau
         return $this;
     }
 
-    public function getNiveau(): ?int
+    public function getNiveau(): ?float
     {
         return $this->niveau;
     }
 
-    public function setNiveau(int $niveau): static
+    public function setNiveau(float $niveau): static
     {
         $this->niveau = $niveau;
 

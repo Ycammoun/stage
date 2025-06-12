@@ -1,11 +1,79 @@
-<h1>Gagnant{{ gagnant|length > 1 ? 's' : '' }} de la poule {{ poule.id }}</h1>
+{% extends 'base.html.twig' %}
 
-{% if gagnant is not empty %}
-    <ul>
-        {% for equipe in gagnant %}
-            <li>{{ equipe.nom }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Aucun gagnant déterminé pour cette poule.</p>
-{% endif %}
+{% block title %}Tournoi{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('libs/jquery-bracket/jquery.bracket.min.css') }}">
+    <style>
+        .jbracket .round {
+            margin-right: 100px; /* Plus d’espace entre les rounds */
+        }
+
+        .jbracket .team {
+            height: auto !important;
+            min-height: 80px !important;
+            font-size: 22px !important;
+            line-height: 1.4 !important;
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            overflow: visible !important;
+            padding: 12px 20px !important;
+            width: 360px !important;
+            max-width: 100% !important;
+            box-sizing: border-box;
+        }
+
+        .jbracket .team div {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+        }
+
+        .jbracket .team.win {
+            background-color: #d4edda;
+            border: 2px solid #1684d1;
+        }
+
+        .jbracket .score {
+            font-size: 20px !important;
+            font-weight: bold;
+        }
+    </style>
+
+
+{% endblock %}
+
+{% block body %}
+    <h1>Tournoi - Poule {{ poule.numero }}</h1>
+    <div id="bracket" style="zoom: 1.2;"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('libs/jquery-bracket/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ asset('libs/jquery-bracket/jquery.bracket.min.js') }}"></script>
+
+    <script>
+        $(function () {
+            const data = {
+                teams: [
+                    {% if m1 and m2 and m3 and m4 %}
+                    ["{{ m1.equipe1.nom }}", "{{ m1.equipe2.nom }}"],
+                    ["{{ m2.equipe1.nom }}", "{{ m2.equipe2.nom }}"],
+                    ["{{ m3.equipe1.nom }}", "{{ m3.equipe2.nom }}"],
+                    ["{{ m4.equipe1.nom }}", "{{ m4.equipe2.nom }}"]
+                            {% else %}
+                        ["", ""], ["", ""], ["", ""], ["", ""]
+                    {% endif %}
+                ],
+                results: [
+                    [[{{ m1.score1 }}, {{ m1.score2 }}], [{{ m2.score1 }}, {{ m2.score2 }}]],
+                    [[{{ m3.score1 }}, {{ m3.score2 }}], [{{ m4.score1 }}, {{ m4.score2 }}]]
+                ]
+            };
+
+            $('#bracket').bracket({
+                init: data
+            });
+        });
+    </script>
+{% endblock %}

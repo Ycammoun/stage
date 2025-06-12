@@ -5,7 +5,7 @@ class CalculTournoiService
 {
     public function calculTournoi(int $nbJoueur, int $nbTab, int $nbTerrain)
     {
-        $nbEquipeParTab = (int) ($nbJoueur / 2 / $nbTab); // On force int pour le match
+        $nbEquipeParTab = (int) ($nbJoueur / 2 / $nbTab);
         $repartitions = [];
 
         $cases = match ($nbEquipeParTab) {
@@ -27,7 +27,7 @@ class CalculTournoiService
                 $nbMatchs += $this->nbMatch($nbEquipes);
             }
 
-            // Supposons 10 minutes par match
+            // supposons 10 minutes par match
             $tempsEstime = ceil($nbMatchs / $nbTerrain) * 10;
 
             $repartitions[] = [
