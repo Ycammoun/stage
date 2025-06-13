@@ -190,6 +190,8 @@ final class TournoiController extends AbstractController
 
         $gagnant = $win->win($poule->getId());
 
+        $m1 = $m2 = $m3 = $m4 = null;
+
         // On attend exactement 5 équipes
         if (count($gagnant) === 5) {
             $m1 = new Partie();
@@ -197,9 +199,9 @@ final class TournoiController extends AbstractController
             $m1->setEquipe2($gagnant[4]);
             $m1->setPoule($poule);
             $m1->setEnCours(false);
-            $m1->setScore1(1); // valeur fictive pour test
+            $m1->setScore1(1); // valeurs fictives
             $m1->setScore2(0);
-            $m1->setIsValideParAdversaire(true); // à ajuster selon logique
+            $m1->setIsValideParAdversaire(true);
 
             $m2 = new Partie();
             $m2->setEquipe1($gagnant[1]);
@@ -226,7 +228,7 @@ final class TournoiController extends AbstractController
                 $entityManager->persist($m3);
             }
 
-            if (isset($m3) && $m3->isValideParAdversaire()) {
+            if ($m3 && $m3->isValideParAdversaire()) {
                 $m4 = new Partie();
                 $m4->setEquipe1($this->getGagnant($m3));
                 $m4->setEquipe2($this->getGagnant($m2));
@@ -245,22 +247,19 @@ final class TournoiController extends AbstractController
         return $this->render('tournoi/gagnant.html.twig', [
             'gagnant' => $gagnant,
             'poule' => $poule,
-            'm1' => $m1 ?? null,
-            'm2' => $m2 ?? null,
-            'm3' => $m3 ?? null,
-            'm4' => $m4 ?? null,
+            'm1' => $m1,
+            'm2' => $m2,
+            'm3' => $m3,
+            'm4' => $m4,
         ]);
     }
 
-    /**
-     * Retourne l'équipe gagnante d'une partie (à ajuster selon ta logique réelle)
-     */
-    private function getGagnant(Partie $partie): ?Equipe
+// Méthode ajoutée
+    private function getGagnant(Partie $partie): Equipe
     {
-        if ($partie->getScore1() > $partie->getScore2()) {
-            return $partie->getEquipe1();
-        }
-        return $partie->getEquipe2();
+        return $partie->getScore1() > $partie->getScore2()
+            ? $partie->getEquipe1()
+            : $partie->getEquipe2();
     }
 
     #[Route('/affichepoules/{id}', name: '_affichepoules')]

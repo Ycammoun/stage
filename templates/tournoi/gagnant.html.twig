@@ -1,79 +1,161 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}Tournoi{% endblock %}
-
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('libs/jquery-bracket/jquery.bracket.min.css') }}">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Tournoi séquentiel sans duplicata</title>
     <style>
-        .jbracket .round {
-            margin-right: 100px; /* Plus d’espace entre les rounds */
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            padding: 0px 20px 100px 20px; /* padding-bottom augmenté */
+            margin-bottom: 200px;
         }
 
-        .jbracket .team {
-            height: auto !important;
-            min-height: 80px !important;
-            font-size: 22px !important;
-            line-height: 1.4 !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow: visible !important;
-            padding: 12px 20px !important;
-            width: 360px !important;
-            max-width: 100% !important;
-            box-sizing: border-box;
+        .bracket {
+            display: flex;
+            flex-direction: column;
+            gap: 100px;
+            margin-bottom: 500px;
         }
 
-        .jbracket .team div {
-            white-space: normal !important;
-            overflow: visible !important;
-            text-overflow: unset !important;
+        .match {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
         }
 
-        .jbracket .team.win {
-            background-color: #d4edda;
-            border: 2px solid #1684d1;
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative;
         }
 
-        .jbracket .score {
-            font-size: 20px !important;
+        .team {
+            width: 220px;
+            border: 2px solid black;
+            padding: 10px;
+            background-color: #f2f2f2;
+            text-align: center;
             font-weight: bold;
         }
+
+        .winner {
+            background-color: #d4edda;
+        }
+
+        .label {
+            font-size: 12px;
+            background: black;
+            color: yellow;
+            padding: 4px 8px;
+            text-align: center;
+            align-self: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        /* Round 1 */
+        .round1 {
+            margin-left: 0;
+            margin-bottom: -50px;
+            margin-top: 100px;
+        }
+
+        /* Round 2 */
+        .round2.matchB {
+            margin-left: 300px;
+            margin-top: -180px;
+        }
+
+        .round2.matchC {
+            margin-left: 300px;
+            margin-top: 80px;
+        }
+
+        .round2 .column {
+            gap: 30px;
+        }
+
+        /* Round 3 - Finale */
+        .round3 {
+            margin-left: 600px;
+            margin-top: -460px;
+        }
+
+        .round3 .column {
+            gap: 250px;
+        }
+
+        /* Gagnant */
+        .winner-box {
+            margin-top: -700px;
+            margin-left: 900px;
+            padding: 20px;
+            border: 3px solid green;
+            background-color: #e6ffe6;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            max-width: 400px;
+            border-radius: 8px;
+        }
+
     </style>
+</head>
+<body>
 
+<h2>Tournoi - Arbre séquentiel (sans duplication)</h2>
 
-{% endblock %}
+<div class="bracket">
 
-{% block body %}
-    <h1>Tournoi - Poule {{ poule.numero }}</h1>
-    <div id="bracket" style="zoom: 1.2;"></div>
-{% endblock %}
+    <!-- Match A : Équipe 2 vs Équipe 3 -->
+    <div class="match round1">
+        <div class="column">
+            <div class="team">Équipe 2 <span class="score">12</span></div>
+            <div class="team winner">Équipe 3 <span class="score">15</span></div>
+            <div class="label">Match A</div>
+        </div>
+    </div>
 
-{% block javascripts %}
-    <script src="{{ asset('libs/jquery-bracket/jquery-3.6.0.min.js') }}"></script>
-    <script src="{{ asset('libs/jquery-bracket/jquery.bracket.min.js') }}"></script>
+    <!-- Match B : Équipe 1 vs gagnant Match A (Équipe 3) -->
+    <div class="match round2 matchB">
+        <div class="column">
+            <div class="team">Équipe 1 <span class="score">18</span></div>
+            <div class="team winner">↑ Équipe 3 <span class="score">20</span></div>
+            <div class="label">Match B</div>
+        </div>
+    </div>
 
-    <script>
-        $(function () {
-            const data = {
-                teams: [
-                    {% if m1 and m2 and m3 and m4 %}
-                    ["{{ m1.equipe1.nom }}", "{{ m1.equipe2.nom }}"],
-                    ["{{ m2.equipe1.nom }}", "{{ m2.equipe2.nom }}"],
-                    ["{{ m3.equipe1.nom }}", "{{ m3.equipe2.nom }}"],
-                    ["{{ m4.equipe1.nom }}", "{{ m4.equipe2.nom }}"]
-                            {% else %}
-                        ["", ""], ["", ""], ["", ""], ["", ""]
-                    {% endif %}
-                ],
-                results: [
-                    [[{{ m1.score1 }}, {{ m1.score2 }}], [{{ m2.score1 }}, {{ m2.score2 }}]],
-                    [[{{ m3.score1 }}, {{ m3.score2 }}], [{{ m4.score1 }}, {{ m4.score2 }}]]
-                ]
-            };
+    <!-- Match C : Équipe 4 vs Équipe 5 -->
+    <div class="match round2 matchC">
+        <div class="column">
+            <div class="team">Équipe 4 <span class="score">14</span></div>
+            <div class="team winner">Équipe 5 <span class="score">16</span></div>
+            <div class="label">Match C</div>
+        </div>
+    </div>
 
-            $('#bracket').bracket({
-                init: data
-            });
-        });
-    </script>
-{% endblock %}
+    <!-- Finale : gagnants des matchs B et C -->
+    <div class="match round3">
+        <div class="column">
+            <div class="team winner">↑ Équipe 3 <span class="score">21</span></div>
+            <div class="team">Équipe 5 <span class="score">17</span></div>
+            <div class="label">Finale</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Gagnant -->
+<div class="winner-box">
+    🏆 Gagnant du tournoi : Équipe 3 🎉
+</div>
+
+</body>
+</html>
