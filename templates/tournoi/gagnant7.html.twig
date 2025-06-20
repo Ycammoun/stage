@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Tournoi Poule de 7</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            padding: 0 20px 100px 20px;
+            margin-bottom: 200px;
+        }
+
+        /* Conteneur global avec bracket + résultats côte à côte */
+        .container {
+            display: flex;
+            gap: 40px; /* espace entre bracket et résultats */
+            margin-top: 80px;
+            align-items: flex-start;
+        }
+
+        .bracket {
+            display: flex;
+            gap: 0; /* pas d’espace horizontal entre les rounds */
+            align-items: flex-start;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            margin: 0;
+            padding: 0 10px;
+            position: relative;
+        }
+
+        .round2 {
+            align-self: flex-start;
+            transform: translateY(60px);
+            margin-top: -120px;
+            margin-left: -20px;
+            gap : 200px;
+        }
+
+        .round3 {
+            align-self: flex-start;
+            transform: translateY(120px);
+            margin-left: -20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative;
+        }
+
+        .match {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .team {
+            width: 200px;
+            border: 2px solid black;
+            padding: 10px;
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .winner {
+            background-color: #a9e4b7;
+        }
+
+        .label {
+            font-size: 12px;
+            background: black;
+            color: yellow;
+            padding: 4px 8px;
+            text-align: center;
+            align-self: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        .score {
+            color: yellow;
+            border: 1px solid black;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: #000;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        /* Bloc des résultats, aligné verticalement avec round3 */
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 120px; /* même décalage vertical que round3 */
+            max-width: 400px;
+        }
+
+        .results .team {
+            padding: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .results .winner {
+            background-color: gold !important;
+        }
+
+        .results .runnerup {
+            background-color: silver !important;
+            margin-top: 10px;
+        }
+
+        /* Nouvelle div élimination encadrée en rouge */
+        .elimination {
+            border: 3px solid red;
+            padding: 20px;
+            margin-left: 40px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        /* Rounds dans elimination */
+        .elimination .round {
+            gap: 40px;
+        }
+
+        /* Classement bronze */
+        .bronze-ranking {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 220px;
+        }
+
+        .bronze-ranking .team {
+            background-color: #cd7f32; /* bronze color */
+            border-color: #8c4a18;
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+            text-align: center;
+            border-radius: 6px;
+        }
+
+        .bronze-label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #8c4a18;
+        }
+        .round11{
+            margin-top: 130px;
+        }
+        .round22{
+            margin-top: 60px;
+            margin-left: -40px;
+            position: relative;
+            height: 300px; /* juste pour tester */
+
+
+        }
+        .round2::after , .round1::after{
+            content: '';
+            position: absolute;
+            right: 10px; /* ou left si la ligne part à gauche */
+            top:  -4%;
+            height: 440px; /* ajuster selon ton espacement */
+            width: 2px;
+            background-color: black;
+        }
+        .round3::after, .round11::after{
+            content: '';
+            position: absolute;
+            right: 10px; /* ou left si la ligne part à gauche */
+            top:  0%;
+            height: 100px; /* ajuster selon ton espacement */
+            width: 2px;
+            background-color: black;
+        }
+         round11::after,.round22::after{
+            content: '';
+            position: absolute;
+            right: 10px; /* ou left si la ligne part à gauche */
+            top:  0%;
+            height: 250px; /* ajuster selon ton espacement */
+            width: 2px;
+            background-color: black;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<h2>Tournoi - Poule de 7 équipes</h2>
+
+<div class="container">
+    <div class="bracket">
+
+        <!-- Round 1 -->
+        <div class="round round1">
+            <div class="match">
+                <div class="column">
+                    <div class="team">{{  m1.equipe1.nom }}<span class="score">{{  m1.score1 }}</span></div>
+                    <div class="team">{{  m1.equipe2.nom }} <span class="score">{{  m1.score2 }}</span></div>
+                    <div class="label">Match 1</div>
+                </div>
+            </div>
+            <div class="match">
+                <div class="column">
+                    <div class="team">{{  m2.equipe1.nom }}<span class="score">{{  m2.score1 }}</span></div>
+                    <div class="team">{{  m2.equipe2.nom }} <span class="score">{{  m2.score2 }}</span></div>
+                    <div class="label">Match 2</div>
+                </div>
+            </div>
+            <div class="match">
+                <div class="column">
+                    <div class="team">{{  m3.equipe1.nom }} <span class="score">{{ m3.score1 }}</span></div>
+                    <div class="team">{{  m3.equipe2.nom }} <span class="score">{{ m3.score2 }}</span></div>
+                    <div class="label">Match 3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Round 2 -->
+        <div class="round round2">
+            <div class="match">
+                <div class="column">
+                    <div class="team">{{ m5.equipe1.nom}} <span class="score">{{ m5.score1 }}</span></div>
+                    <div class="team">{{ m5.equipe2.nom}} <span class="score">{{ m5.score2 }}</span></div>
+                    <div class="label">Demi-finale 1</div>
+                </div>
+            </div>
+            <div class="match">
+                <div class="column">
+                    <div class="team"> {{ m4.equipe1.nom}}<span class="score">{{ m4.score1 }}</span></div>
+                    <div class="team"> {{ m4.equipe2.nom}}<span class="score">{{ m4.score2 }}</span></div>
+                    <div class="label">Demi-finale 2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Round 3 -->
+        <div class="round round3">
+            <div class="match">
+                <div class="column">
+                    <div class="team">{{ m11.equipe1.nom }} <span class="score">{{ m11.score1 }}</span></div>
+                    <div class="team">{{ m11.equipe2.nom }} <span class="score">{{ m11.score2 }}</span></div>
+                    <div class="label">Finale</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Résultats à droite -->
+    <div class="results">
+        <div class="team winner">
+            🏆 Gagnant :
+            {% if m11.score1 > m11.score2 %}
+                {{ m11.equipe1.nom }}
+            {% else %}
+                {{ m11.equipe2.nom }}
+            {% endif %}
+        </div>
+        <div class="team runnerup">
+            🥈 Deuxième :
+            {% if m11.score1 > m11.score2 %}
+                {{ m11.equipe2.nom }}
+            {% else %}
+                {{ m11.equipe1.nom }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Nouvelle section élimination -->
+<div class="elimination">
+
+    <!-- Round 1 dans élimination -->
+    <div class="round round11">
+        <div class="match">
+            <div class="column">
+                <div class="team">{{ m7.equipe1.nom }}<span class="score">{{ m7.score1 }}</span></div>
+                <div class="team">{{ m7.equipe2.nom }}<span class="score">{{ m7.score2 }}</span></div>
+                <div class="label">M7 class</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Round 2 dans élimination -->
+    <div class="round round22">
+        <div class="match">
+            <div class="column">
+                <div class="team">{{ m6.equipe1.nom }} <span class="score">{{ m6.score1 }}</span></div>
+                <div class="team">{{ m6.equipe2.nom }}<span class="score">{{ m6.score2 }}</span></div>
+                <div class="label">Match Élimination 2</div>
+            </div>
+        </div>
+        <div class="match">
+            <div class="column">
+                <div class="team">{{ m8.equipe1.nom}}<span class="score">{{ m8.score1 }}</span></div>
+                <div class="team">{{ m8.equipe2.nom}} <span class="score">{{ m8.score2 }}</span></div>
+                <div class="label">Match Élimination 3</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Classement bronze -->
+    <div class="bronze-ranking">
+        <div class="bronze-label">Classement </div>
+        <div class="team">
+            {%  if m6.score1>m6.score2 %}
+            Bronze : {{ m6.equipe1.nom }}
+            {% else %}
+            Bronze : {{ m6.equipe2.nom }}
+            {% endif %}
+        </div>
+        <div class="team">
+            {%  if m6.score1<m6.score2 %}
+                4EM : {{ m6.equipe1.nom }}
+            {% else %}
+                4EM : {{ m6.equipe2.nom }}
+            {% endif %}
+        </div>
+        <div class="team">
+            {%  if m8.score1>m8.score2 %}
+                5EM :{{ m8.equipe1.nom }}
+            {% else %}
+                5EM : {{ m8.equipe2.nom }}
+            {% endif %}
+        </div>
+        <div class="team">
+            {%  if m8.score1<m8.score2 %}
+                6EM :{{ m8.equipe1.nom }}
+            {% else %}
+                6EM : {{ m8.equipe2.nom }}
+            {% endif %}
+        </div>
+        <div class="team">
+            {% if m7.score1 > m7.score2 %}
+                {{ m7.equipe2.nom }}
+            {% else %}
+                {{ m7.equipe1.nom }}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

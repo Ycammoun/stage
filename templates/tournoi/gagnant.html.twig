@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <title>Tournoi séquentiel sans duplicata</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #fff;
-            padding: 0px 20px 100px 20px; /* padding-bottom augmenté */
+            padding: 0px 20px 100px 20px;
             margin-bottom: 200px;
         }
 
@@ -23,6 +24,7 @@
             align-items: center;
             justify-content: flex-start;
             position: relative;
+            box-sizing: border-box; /* important */
         }
 
         .column {
@@ -33,16 +35,17 @@
         }
 
         .team {
-            width: 220px;
+            width: 200px;
             border: 2px solid black;
             padding: 10px;
             background-color: #f2f2f2;
             text-align: center;
             font-weight: bold;
+            position: relative; /* pour pseudo-éléments */
         }
 
         .winner {
-            background-color: #d4edda;
+            background-color: #a9e4b7;
         }
 
         .label {
@@ -69,12 +72,12 @@
 
         /* Round 2 */
         .round2.matchB {
-            margin-left: 300px;
-            margin-top: -180px;
+            margin-left: 222px;
+            margin-top: -200px;
         }
 
         .round2.matchC {
-            margin-left: 300px;
+            margin-left: 222px;
             margin-top: 80px;
         }
 
@@ -84,12 +87,12 @@
 
         /* Round 3 - Finale */
         .round3 {
-            margin-left: 600px;
-            margin-top: -460px;
+            margin-left: 445px;
+            margin-top: -410px;
         }
 
         .round3 .column {
-            gap: 250px;
+            gap: 150px;
         }
 
         /* Gagnant */
@@ -97,8 +100,8 @@
             margin-top: -700px;
             margin-left: 900px;
             padding: 20px;
-            border: 3px solid green;
-            background-color: #e6ffe6;
+            border: 3px solid #000000;
+            background-color: #ffd700;
             text-align: center;
             font-size: 20px;
             font-weight: bold;
@@ -106,56 +109,225 @@
             border-radius: 8px;
         }
 
+        .score {
+            color: yellow;
+            border: 1px solid black;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: #000;
+            font-weight: bold;
+        }
+
+        /* Traits graphiques */
+
+        /* Trait vertical descendant de chaque équipe (à gauche de la box) */
+        .team::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 2px;
+            height: 50%;
+            background: black;
+            transform: translateX(-100%) translateY(-50%);
+            z-index: 0;
+        }
+
+
+
+        /* Trait vertical entre les colonnes (entre rounds) */
+        .round2.matchB::before,
+        .round2.matchC::before,
+        .round3::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0; /* à gauche de la colonne */
+            width: 2px;
+            height: 100%;
+            background: black;
+            z-index: 0;
+        }
+
+        /* Position relative pour les colonnes avec traits */
+        .round2.matchB,
+        .round2.matchC,
+        .round3 {
+            position: relative;
+        }
+
+
+
     </style>
-</head>
+
 <body>
 
 <h2>Tournoi - Arbre séquentiel (sans duplication)</h2>
 
+
 <div class="bracket">
 
-    <!-- Match A : Équipe 2 vs Équipe 3 -->
-    <div class="match round1">
-        <div class="column">
-            <div class="team">Équipe 2 <span class="score">12</span></div>
-            <div class="team winner">Équipe 3 <span class="score">15</span></div>
-            <div class="label">Match A</div>
+    {# Match A : m1 (équipe1 vs équipe2) #}
+    {% if m1 %}
+        <div class="match round1">
+            <div class="column">
+                <div class="team {{ m1.score1 > m1.score2 ? 'winner' : '' }}">
+                  {{ m1.equipe1.nom }} <span class="score">{{ m1.score1 }}</span>
+                </div>
+                <div class="team {{ m1.score2 > m1.score1 ? 'winner' : '' }}">
+                    {{ m1.equipe2.nom }} <span class="score">{{ m1.score2 }}</span>
+                </div>
+                <div class="label">Match 1</div>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
-    <!-- Match B : Équipe 1 vs gagnant Match A (Équipe 3) -->
-    <div class="match round2 matchB">
-        <div class="column">
-            <div class="team">Équipe 1 <span class="score">18</span></div>
-            <div class="team winner">↑ Équipe 3 <span class="score">20</span></div>
-            <div class="label">Match B</div>
+    {# Match B : m3 (équipe1 vs gagnant m1) #}
+    {% if m3 %}
+        <div class="match round2 matchB">
+            <div class="column">
+                <div class="team {{ m3.score1 > m3.score2 ? 'winner' : '' }}">
+                    {{ m3.equipe1.nom }} <span class="score">{{ m3.score1 }}</span>
+                </div>
+                <div class="team {{ m3.score2 > m3.score1 ? 'winner' : '' }}">
+                    ↑ {{ m3.equipe2.nom }} <span class="score">{{ m3.score2 }}</span>
+                </div>
+                <div class="label">Match 2</div>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
-    <!-- Match C : Équipe 4 vs Équipe 5 -->
-    <div class="match round2 matchC">
-        <div class="column">
-            <div class="team">Équipe 4 <span class="score">14</span></div>
-            <div class="team winner">Équipe 5 <span class="score">16</span></div>
-            <div class="label">Match C</div>
+    {# Match C : m2 (équipe1 vs équipe2) #}
+    {% if m2 %}
+        <div class="match round2 matchC">
+            <div class="column">
+                <div class="team {{ m2.score1 > m2.score2 ? 'winner' : '' }}">
+                    {{ m2.equipe1.nom }} <span class="score">{{ m2.score1 }}</span>
+                </div>
+                <div class="team {{ m2.score2 > m2.score1 ? 'winner' : '' }}">
+                    {{ m2.equipe2.nom }} <span class="score">{{ m2.score2 }}</span>
+                </div>
+                <div class="label">Match 3</div>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
-    <!-- Finale : gagnants des matchs B et C -->
-    <div class="match round3">
-        <div class="column">
-            <div class="team winner">↑ Équipe 3 <span class="score">21</span></div>
-            <div class="team">Équipe 5 <span class="score">17</span></div>
-            <div class="label">Finale</div>
+    {# Finale : m4 (gagnants des m3 et m2) #}
+    {% if m4 %}
+        <div class="match round3">
+            <div class="column">
+                <div class="team {{ m4.score1 > m4.score2 ? 'winner' : '' }}">
+                    ↑ {{ m4.equipe1.nom }} <span class="score">{{ m4.score1 }}</span>
+                </div>
+                <div class="team {{ m4.score2 > m4.score1 ? 'winner' : '' }}">
+                    {{ m4.equipe2.nom }} <span class="score">{{ m4.score2 }}</span>
+                </div>
+                <div class="label">Finale</div>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
 </div>
 
-<!-- Gagnant -->
-<div class="winner-box">
-    🏆 Gagnant du tournoi : Équipe 3 🎉
+
+{# Gagnant final #}
+{% if m4 %}
+    <div class="winner-box">
+        🏆 Gagnant du tournoi : {{ m4.score1 > m4.score2 ? m4.equipe1.nom : m4.equipe2.nom }} 🎉
+    </div>
+
+    <div class="winner-box" style="background-color: #c0c0c0; color: black; margin-top: 20px;">
+        🥈 Deuxième place : {{ m4.score1 < m4.score2 ? m4.equipe1.nom : m4.equipe2.nom }}
+    </div>
+
+    {# Perdants m2 et m3 dans des boxes rouges distincts #}
+    {% if m2 %}
+        <div class="winner-box" style="background-color: #ff4c4c; color: white; margin-top: 20px; border-color: darkred;">
+            🥉 3em place :
+            {% set perdant_m2 = m2.score1 < m2.score2 ? m2.equipe1 : m2.equipe2 %}
+            {{ perdant_m2.nom }} ({{ m2.score1 < m2.score2 ? m2.score1 : m2.score2 }})
+        </div>
+    {% endif %}
+
+    {% if m3 %}
+        <div class="winner-box" style="background-color: #ff4c4c; color: white; margin-top: 20px; border-color: darkred;">
+            🥉 4em place :
+            {% set perdant_m3 = m3.score1 < m3.score2 ? m3.equipe1 : m3.equipe2 %}
+            {{ perdant_m3.nom }} ({{ m3.score1 < m3.score2 ? m3.score1 : m3.score2 }})
+        </div>
+    {% endif %}
+
+    {# Match pour la 3ème place entre perdants #}
+    {% if m5 is defined and m5 %}
+        <div class="winner-box" style="background-color: #b22222; color: white; margin-top: 20px; border-color: darkred;">
+            🥉 Match pour la 3ème place :
+            {{ m5.equipe1.nom }} ({{ m5.score1 }}) vs {{ m5.equipe2.nom }} ({{ m5.score2 }})
+            <br>
+            <strong>Classement 3ème place :</strong>
+            {{ m5.score1 > m5.score2 ? m5.equipe1.nom : m5.equipe2.nom }}
+        </div>
+    {% else %}
+        <div class="winner-box" style="background-color: #b22222; color: white; margin-top: 20px; border-color: darkred;">
+            🥉 5em place : Perdant match 1 {{ m1.score1 < m1.score2 ? m1.equipe1.nom : m1.equipe2.nom }}
+        </div>
+    {% endif %}
+{% endif %}
+<div class="winner-box" style="background-color: #b22222; color: white; margin-top: 20px; border-color: darkred;">
+    🥉 5em place : Perdant match 1 {{ m1.score1 < m1.score2 ? m1.equipe1.nom : m1.equipe2.nom }}
 </div>
+{# Match 3ᵉ place - entre perdants de m2 et m3 dans un box rouge #}
+{% if m2 and m3 %}
+    <div style="margin-top: 40px; border: 3px solid red; padding: 20px; max-width: 400px; border-radius: 8px; background-color: #ffe6e6; font-weight: bold; text-align: center;">
+        <div>🥉 Tableau d'elimination </div>
+        <div class="team {{ 2 > 5 ? 'winner' : '' }}">
+            {{ m2.score1 < m2.score2 ? m2.equipe1.nom : m2.equipe2.nom }} <span class="score">2</span>
+        </div>
+        <div class="team {{ 5 > 2 ? 'winner' : '' }}">
+            {{ m3.score1 < m3.score2 ? m3.equipe1.nom : m3.equipe2.nom }} <span class="score">5</span>
+        </div>
+    </div>
+{% endif %}
+<form id="refresh-form" style="margin-top: 40px; text-align: center;">
+    <button type="button" id="refresh-button" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">
+        Mettre à jour les valeurs
+    </button>
+</form>
+
+<script>
+    document.getElementById('refresh-button').addEventListener('click', function () {
+        fetch('{{ path("tournoiafficher_apres_midi", {"id": poule.id}) }}?_=' + new Date().getTime(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Erreur réseau');
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newBody = doc.querySelector('body');
+                if (newBody) {
+                    document.body.innerHTML = newBody.innerHTML;
+
+                    // ⚠️ Très important : Réattacher le listener au nouveau bouton
+                    const newButton = document.getElementById('refresh-button');
+                    if (newButton) {
+                        newButton.addEventListener('click', arguments.callee);
+                    }
+                } else {
+                    console.error('Body introuvable dans la réponse');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour :', error);
+            });
+    });
+</script>
+
+
 
 </body>
 </html>

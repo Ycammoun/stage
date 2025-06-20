@@ -39,6 +39,8 @@ class Partie
     #[ORM\Column]
     private ?int $score2 = null;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $setParEquipe = null;
     #[ORM\ManyToOne(inversedBy: 'parties')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Poule $poule = null;
@@ -50,6 +52,9 @@ class Partie
     #[ORM\JoinColumn(nullable: true)]
 
     private ?Terrain $terrain = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $bracket = null;
 
     public function getId(): ?int
     {
@@ -173,6 +178,28 @@ class Partie
     public function setTerrain(?Terrain $terrain): static
     {
         $this->terrain = $terrain;
+
+        return $this;
+    }
+    public function getSetParEquipe(): ?int
+    {
+        return $this->setParEquipe;
+    }
+
+    public function setSetParEquipe(?int $setParEquipe): self
+    {
+        $this->setParEquipe = $setParEquipe;
+        return $this;
+    }
+
+    public function isBracket(): ?bool
+    {
+        return $this->bracket;
+    }
+
+    public function setBracket(?bool $bracket): static
+    {
+        $this->bracket = $bracket;
 
         return $this;
     }

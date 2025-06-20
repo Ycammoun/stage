@@ -1,42 +1,48 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-<h1>Mes matchs à venir</h1>
+    <h1>Mes matchs à venir</h1>
 
-<div class="matches-container">
-    {% for matche in matches %}
-        <div class="match-card">
-            <div class="match-info">
-                <div class="teams">
-                    <span class="team">{{ matche.equipe1.nom }}</span>
-                    <span class="score">{{ matche.score1 }} - {{ matche.score2 }}</span>
-                    <span class="team">{{ matche.equipe2.nom }}</span>
-                </div>
-                <div class="match-details">
-                    <p><strong>Date:</strong> {{ matche.date|date("d/m/Y H:i") }}</p>
-                    <p><strong>En cours:</strong> {{ matche.enCours ? 'Oui' : 'Non' }}</p>
-                    <p><strong>ID:</strong> {{ matche.id }}</p>
-                    {% if app.user in matche.equipe1.joueurs %}
-                        {% set urlSetScore = path('utilisateur_setScore', {'idMatche': matche.id}) %}
-                        <a href="{{ urlSetScore }}" class="btn btn-primary">Set Score</a>
-                        {% elseif app.user in matche.equipe2.joueurs  %}
+    <div class="matches-container">
+        {% for matche in matches %}
+            <div class="match-card">
+                <div class="match-info">
+                    <div class="teams">
+                        <span class="team">{{ matche.equipe1.nom }}</span>
+                        <span class="score">{{ matche.score1 }} - {{ matche.score2 }}</span>
+                        <span class="team">{{ matche.equipe2.nom }}</span>
+                    </div>
+                    <div class="match-details">
+                        <p><strong>Date:</strong> {{ matche.date|date("d/m/Y H:i") }}</p>
+                        <p><strong>En cours:</strong> {{ matche.enCours ? 'Oui' : 'Non' }}</p>
+                        <p><strong>ID:</strong> {{ matche.id }}</p>
 
-                            {% if matche.score1 is not null and matche.score2 is not null %}
-                                {% if not matche.valideParAdversaire %}
-                                    <a href="{{ path('utilisateur_valider_score', {idMatche: matche.id}) }}" class="btn btn-success">
-                                        Valider le score
-                                    </a>
-                                {% else %}
-                                    <p class="text-success">Score validé</p>
-                                {% endif %}
+                        {# Test si score a été saisi (0-0 = pas saisi) #}
+                        {% set scoreIsSet = (matche.score1 != 0 or matche.score2 != 0) %}
+                        {% set setParEquipe = matche.setParEquipe %}
+
+                        {% if not scoreIsSet %}
+                            {# Score pas encore saisi : les deux équipes peuvent SET le score #}
+                            {% if app.user in matche.equipe1.joueurs or app.user in matche.equipe2.joueurs %}
+                                <a href="{{ path('utilisateur_setScore', {'idMatche': matche.id}) }}" class="btn btn-primary">Set Score</a>
                             {% endif %}
-
-                    {% endif %}
+                        {% else %}
+                            {# Score saisi #}
+                            {% if not matche.valideParAdversaire %}
+                                {# Seule l'équipe *adverse* à celle qui a set le score peut VALIDER #}
+                                {% if setParEquipe == 1 and app.user in matche.equipe2.joueurs %}
+                                    <a href="{{ path('utilisateur_valider_score', {'idMatche': matche.id}) }}" class="btn btn-success">Valider le score</a>
+                                {% elseif setParEquipe == 2 and app.user in matche.equipe1.joueurs %}
+                                    <a href="{{ path('utilisateur_valider_score', {'idMatche': matche.id}) }}" class="btn btn-success">Valider le score</a>
+                                {% elseif (setParEquipe == 1 and app.user in matche.equipe1.joueurs) or (setParEquipe == 2 and app.user in matche.equipe2.joueurs) %}
+                                    <p class="text-warning">En attente de validation</p>
+                                {% endif %}
+                            {% else %}
+                                <p class="text-success">Score validé</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-    {% endfor %}
-</div>
-{% endblock%}
-
-
-
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -133,6 +133,14 @@ final class UtilisateurController extends AbstractController
                 $matche,
 
             );
+            $user = $this->getUser();
+
+            if ($matche->getEquipe1()->getJoueurs()->contains($user)) {
+                $matche->setSetParEquipe(1);
+            } elseif ($matche->getEquipe2()->getJoueurs()->contains($user)) {
+                $matche->setSetParEquipe(2);
+            }
+
             $terrain=$matche->getTerrain();
 
             $matche->setTerrain(NULL);
@@ -144,7 +152,7 @@ final class UtilisateurController extends AbstractController
             }
             $entityManager->persist($matche);
             $entityManager->flush();
-            $redistribut->distribution($matche->getPoule()->getTableau()->getTournoi());
+            $redistribut->redistribution($matche->getPoule()->getTableau()->getTournoi());
 
             return $this->redirectToRoute('utilisateur_affichematches');
         }
@@ -185,11 +193,17 @@ final class UtilisateurController extends AbstractController
                 $terrain->setEstOccupé(false);
                 $entityManager->persist($terrain);
             }
+            $user = $this->getUser();
+            if ($matche->getEquipe1()->getJoueurs()->contains($user)) {
+                $matche->setSetParEquipe(1);
+            } elseif ($matche->getEquipe2()->getJoueurs()->contains($user)) {
+                $matche->setSetParEquipe(2);
+            }
 
             $entityManager->persist($matche);
             $entityManager->flush();
 
-            $redistribut->distribution($matche->getPoule()->getTableau()->getTournoi());
+            $redistribut->redistribution($matche->getPoule()->getTableau()->getTournoi());
 
             return new JsonResponse(['message' => 'Score enregistré avec succès'], Response::HTTP_OK);
 
@@ -207,26 +221,39 @@ final class UtilisateurController extends AbstractController
             throw $this->createNotFoundException("Match introuvable.");
         }
 
-        $equipe2 = $matche->getEquipe2();
 
-        // Vérifie si l'utilisateur est bien un joueur de l'équipe 2
-        $autorise = false;
-        foreach ($equipe2->getJoueurs() as $joueur) {
-            if ($joueur === $user) {
-                $autorise = true;
-                break;
-            }
-        }
-
-        if (!$autorise) {
-            throw $this->createAccessDeniedException("Vous n'êtes pas autorisé à valider ce score.");
-        }
 
         $matche->setIsValideParAdversaire(true);
         $entityManager->flush();
 
         return $this->redirectToRoute('utilisateur_affichematches');
     }
+    #[Route('/api/validerScore/{idMatche}', name: 'api_valider_score', methods: ['POST'])]
+    public function validerScoreApi(EntityManagerInterface $entityManager, int $idMatche): JsonResponse
+    {
+        $user = $this->getUser();
+        $matche = $entityManager->getRepository(Partie::class)->find($idMatche);
+
+        if (!$matche) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Match introuvable.'
+            ], 404);
+        }
+
+        // Ici tu peux ajouter une vérification d'autorisation si nécessaire
+
+        $matche->setIsValideParAdversaire(true);
+        $entityManager->flush();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Score validé avec succès.',
+            'idMatche' => $idMatche,
+            //'valideParAdversaire' => $matche->getIsValideParAdversaire(),
+        ]);
+    }
+
     #[Route('/api/poules' , name: '_api_poules')]
     public function affichePouleAction(EntityManagerInterface $em): JsonResponse
     {

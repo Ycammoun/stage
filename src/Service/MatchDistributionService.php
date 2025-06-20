@@ -74,4 +74,34 @@ class MatchDistributionService
 
         return $final;
     }
+    public function redistribution(Tournoi $tournoi): void
+    {
+        $terrains = $tournoi->getTerrains();
+
+        // On ne prend que les matchs non joués (non en cours, sans score, sans terrain)
+        $matches = array_filter(
+            $this->listeFinaleMatches($tournoi),
+            fn($match) =>
+                $match->getTerrain() === null &&
+                !$match->isEnCours() &&
+                $match->getScore1() ===0 &&
+                $match->getScore2() ===0
+        );
+
+        foreach ($matches as $match) {
+            foreach ($terrains as $terrain) {
+                if (!$terrain->isEstOccupé()) {
+                    $match->setTerrain($terrain);
+                    $match->setEnCours(true);
+                    $terrain->setEstOccupé(true);
+
+                    $this->em->persist($match);
+                    $this->em->persist($terrain);
+                    break;
+                }
+            }
+        }
+
+        $this->em->flush();
+    }
 }
