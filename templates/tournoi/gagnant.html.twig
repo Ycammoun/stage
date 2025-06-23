@@ -172,7 +172,7 @@
         <div class="match round1">
             <div class="column">
                 <div class="team {{ m1.score1 > m1.score2 ? 'winner' : '' }}">
-                  {{ m1.equipe1.nom }} <span class="score">{{ m1.score1 }}</span>
+                    {{ m1.equipe1.nom }} <span class="score">{{ m1.score1 }}</span>
                 </div>
                 <div class="team {{ m1.score2 > m1.score1 ? 'winner' : '' }}">
                     {{ m1.equipe2.nom }} <span class="score">{{ m1.score2 }}</span>
@@ -272,15 +272,13 @@
         </div>
     {% endif %}
 {% endif %}
-<div class="winner-box" style="background-color: #b22222; color: white; margin-top: 20px; border-color: darkred;">
-    🥉 5em place : Perdant match 1 {{ m1.score1 < m1.score2 ? m1.equipe1.nom : m1.equipe2.nom }}
-</div>
+
 {# Match 3ᵉ place - entre perdants de m2 et m3 dans un box rouge #}
 {% if m2 and m3 %}
     <div style="margin-top: 40px; border: 3px solid red; padding: 20px; max-width: 400px; border-radius: 8px; background-color: #ffe6e6; font-weight: bold; text-align: center;">
         <div>🥉 Tableau d'elimination </div>
         <div class="team {{ 2 > 5 ? 'winner' : '' }}">
-            {{ m2.score1 < m2.score2 ? m2.equipe1.nom : m2.equipe2.nom }} <span class="score">2</span>
+            {{ m5.score1 < m5.score2 ? m2.equipe1.nom : m2.equipe2.nom }} <span class="score">2</span>
         </div>
         <div class="team {{ 5 > 2 ? 'winner' : '' }}">
             {{ m3.score1 < m3.score2 ? m3.equipe1.nom : m3.equipe2.nom }} <span class="score">5</span>

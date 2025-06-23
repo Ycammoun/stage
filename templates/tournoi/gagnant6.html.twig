@@ -213,8 +213,9 @@
         </div>
     {% endif %}
 
+
     <!-- Classement (Finale + Petite Finale) -->
-    {% if m3 and m4 %}
+     {% if m3 and m4 %}
         {% set final_team1 = m3.score1 > m3.score2 ? m3.equipe1 : m3.equipe2 %}
         {% set final_team2 = m4.score1 > m4.score2 ? m4.equipe1 : m4.equipe2 %}
         {% set final_score1 = m3.score1 > m3.score2 ? m3.score1 : m3.score2 %}
@@ -249,6 +250,11 @@
             </div>
         </div>
     {% endif %}
+    <!-- Classement (Finale + Petite Finale) -->
+
+
+
+
 
 </div>
 
@@ -265,6 +271,46 @@
     </div>
 
 {% endif %}
+
+<form id="refresh-form" style="margin-top: 40px; text-align: center;">
+    <button type="button" id="refresh-button" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">
+        Mettre à jour les valeurs
+    </button>
+</form>
+
+<script>
+    document.getElementById('refresh-button').addEventListener('click', function () {
+        fetch('{{ path("tournoiafficher_apres_midi6", {"id": poule.id}) }}?_=' + new Date().getTime(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Erreur réseau');
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newBody = doc.querySelector('body');
+                if (newBody) {
+                    document.body.innerHTML = newBody.innerHTML;
+
+                    // ⚠️ Très important : Réattacher le listener au nouveau bouton
+                    const newButton = document.getElementById('refresh-button');
+                    if (newButton) {
+                        newButton.addEventListener('click', arguments.callee);
+                    }
+                } else {
+                    console.error('Body introuvable dans la réponse');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour :', error);
+            });
+    });
+</script>
 
 </body>
 </html>
