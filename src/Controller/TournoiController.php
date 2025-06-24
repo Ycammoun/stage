@@ -725,6 +725,145 @@ final class TournoiController extends AbstractController
             'm4' => $m4,
         ]);
     }
+    #[Route('/classement8/{id}', name: '_classement8')]
+    public function classment8(Win $win, EntityManagerInterface $em, int $id)
+    {
+        $tab = $em->getRepository(Tableau::class)->find($id);
+
+        $poules = $tab->getPoules();
+        if (count($poules) < 2) {
+            throw new \Exception("Le tournoi doit contenir deux poules.");
+        }
+
+        $classementA = $win->win($poules[0]->getId());
+        $classementB = $win->win($poules[1]->getId());
+
+        // Création des 4 premiers matchs s'ils n'existent pas
+        $m1 = $this->findMatchIfExists($em, $classementA[0], $classementA[3]);
+        if (!$m1) {
+            $m1 = new Partie();
+            $m1->setEquipe1($classementA[0]);
+            $m1->setEquipe2($classementA[3]);
+            $m1->setPoule($poules[0]);
+            $m1->setBracket(true);
+            $m1->setEnCours(false);
+            $m1->setScore1(0);
+            $m1->setScore2(0);
+            $m1->setIsValideParAdversaire(false);
+            $em->persist($m1);
+        }
+
+        $m2 = $this->findMatchIfExists($em, $classementA[1], $classementA[2]);
+        if (!$m2) {
+            $m2 = new Partie();
+            $m2->setEquipe1($classementA[1]);
+            $m2->setEquipe2($classementA[2]);
+            $m2->setPoule($poules[0]);
+            $m2->setBracket(true);
+            $m2->setEnCours(false);
+            $m2->setScore1(0);
+            $m2->setScore2(0);
+            $m2->setIsValideParAdversaire(false);
+            $em->persist($m2);
+        }
+
+        $m3 = $this->findMatchIfExists($em, $classementB[0], $classementB[3]);
+        if (!$m3) {
+            $m3 = new Partie();
+            $m3->setEquipe1($classementB[0]);
+            $m3->setEquipe2($classementB[3]);
+            $m3->setPoule($poules[1]);
+            $m3->setBracket(true);
+            $m3->setEnCours(false);
+            $m3->setScore1(0);
+            $m3->setScore2(0);
+            $m3->setIsValideParAdversaire(false);
+            $em->persist($m3);
+        }
+
+        $m4 = $this->findMatchIfExists($em, $classementB[1], $classementB[2]);
+        if (!$m4) {
+            $m4 = new Partie();
+            $m4->setEquipe1($classementB[1]);
+            $m4->setEquipe2($classementB[2]);
+            $m4->setPoule($poules[1]);
+            $m4->setBracket(true);
+            $m4->setEnCours(false);
+            $m4->setScore1(0);
+            $m4->setScore2(0);
+            $m4->setIsValideParAdversaire(false);
+            $em->persist($m4);
+        }
+
+        // Création de m5 : gagnants de m1 vs m2
+        $m5 = null;
+        if ($m1->isValideParAdversaire() && $m2->isValideParAdversaire()) {
+            $g1 = $m1->getScore1() > $m1->getScore2() ? $m1->getEquipe1() : $m1->getEquipe2();
+            $g2 = $m2->getScore1() > $m2->getScore2() ? $m2->getEquipe1() : $m2->getEquipe2();
+
+            $m5 = $this->findMatchIfExists($em, $g1, $g2);
+            if (!$m5) {
+                $m5 = new Partie();
+                $m5->setEquipe1($g1);
+                $m5->setEquipe2($g2);
+                $m5->setBracket(true);
+                $m5->setPoule($poules[0]); // Ou une poule finale dédiée
+                $m5->setEnCours(false);
+                $m5->setScore1(0);
+                $m5->setScore2(0);
+                $m5->setIsValideParAdversaire(false);
+                $em->persist($m5);
+            }
+        }
+
+        // Création de m6 : gagnants de m3 vs m4
+        $m6 = null;
+        if ($m3->isValideParAdversaire() && $m4->isValideParAdversaire()) {
+            $g3 = $m3->getScore1() > $m3->getScore2() ? $m3->getEquipe1() : $m3->getEquipe2();
+            $g4 = $m4->getScore1() > $m4->getScore2() ? $m4->getEquipe1() : $m4->getEquipe2();
+
+            $m6 = $this->findMatchIfExists($em, $g3, $g4);
+            if (!$m6) {
+                $m6 = new Partie();
+                $m6->setEquipe1($g3);
+                $m6->setEquipe2($g4);
+                $m6->setBracket(true);
+                $m6->setPoule($poules[1]); // Ou une poule finale dédiée
+                $m6->setEnCours(false);
+                $m6->setScore1(0);
+                $m6->setScore2(0);
+                $m6->setIsValideParAdversaire(false);
+                $em->persist($m6);
+            }
+        }
+
+        $em->flush();
+
+        return $this->render('tournoi/classement9.html.twig', [
+            'tab'=> $tab,
+            'm1' => $m1,
+            'm2' => $m2,
+            'm3' => $m3,
+            'm4' => $m4,
+            'm5' => $m5,
+            'm6' => $m6,
+        ]);
+    }
+
+
+// Fonction utilitaire à ajouter dans le contrôleur
+    private function findMatchIfExists(EntityManagerInterface $em, Equipe $e1, Equipe $e2): ?Partie
+    {
+        return $em->getRepository(Partie::class)->createQueryBuilder('p')
+            ->where('(p.equipe1 = :e1 AND p.equipe2 = :e2) OR (p.equipe1 = :e2 AND p.equipe2 = :e1)')
+            ->andWhere('p.bracket = true')
+            ->setParameter('e1', $e1)
+            ->setParameter('e2', $e2)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+
 
 // Méthode ajoutée
     private function getGagnant(Partie $partie): Equipe

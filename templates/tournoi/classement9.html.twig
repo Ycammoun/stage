@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Tournoi - Poule de 4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            padding: 0px 20px 100px 20px;
+            margin-bottom: 200px;
+        }
+
+        .bracket {
+            display: flex;
+            flex-direction: row;
+            gap: 100px;
+            align-items: flex-start;
+            margin-bottom: 500px;
+        }
+
+        .match {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative;
+        }
+
+        .team {
+            width: 200px;
+            border: 2px solid black;
+            padding: 10px;
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .winner {
+            background-color: #a9e4b7;
+        }
+
+        .label {
+            font-size: 12px;
+            background: black;
+            color: yellow;
+            padding: 4px 8px;
+            text-align: center;
+            align-self: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        .round1 {
+            margin-left: 0;
+            margin-bottom: -50px;
+            margin-top: 100px;
+        }
+
+        .round2 {
+            margin-left: -101px;
+            margin-bottom: 30px;
+            margin-top: 220px;
+        }
+
+        .score {
+            color: yellow;
+            border: 1px solid black;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: #000;
+            font-weight: bold;
+        }
+
+        .team::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 2px;
+            height: 50%;
+            background: black;
+            transform: translateX(-100%) translateY(-50%);
+            z-index: 0;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<h2 style="text-align: center;">Tableau de 8 - 2 poules de 4</h2>
+
+<!-- Bloc remplaçable par AJAX -->
+<div id="scores">
+    <div class="bracket">
+        <!-- Colonne round1 -->
+        <div class="column">
+            {% if m1 %}
+                <div class="match round1">
+                    <div class="column">
+                        <div class="team {{ m1.score1 > m1.score2 ? 'winner' : '' }}">
+                            {{ m1.equipe1.nom }} <span class="score">{{ m1.score1 }}</span>
+                        </div>
+                        <div class="team {{ m1.score2 > m1.score1 ? 'winner' : '' }}">
+                            {{ m1.equipe2.nom }} <span class="score">{{ m1.score2 }}</span>
+                        </div>
+                        <div class="label">Match 1</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if m2 %}
+                <div class="match round1">
+                    <div class="column">
+                        <div class="team {{ m2.score1 > m2.score2 ? 'winner' : '' }}">
+                            {{ m2.equipe1.nom }} <span class="score">{{ m2.score1 }}</span>
+                        </div>
+                        <div class="team {{ m2.score2 > m2.score1 ? 'winner' : '' }}">
+                            {{ m2.equipe2.nom }} <span class="score">{{ m2.score2 }}</span>
+                        </div>
+                        <div class="label">Match 2</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if m3 %}
+                <div class="match round1">
+                    <div class="column">
+                        <div class="team {{ m3.score1 > m3.score2 ? 'winner' : '' }}">
+                            {{ m3.equipe1.nom }} <span class="score">{{ m3.score1 }}</span>
+                        </div>
+                        <div class="team {{ m3.score2 > m3.score1 ? 'winner' : '' }}">
+                            {{ m3.equipe2.nom }} <span class="score">{{ m3.score2 }}</span>
+                        </div>
+                        <div class="label">Match 3</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if m4 %}
+                <div class="match round1">
+                    <div class="column">
+                        <div class="team {{ m4.score1 > m4.score2 ? 'winner' : '' }}">
+                            {{ m4.equipe1.nom }} <span class="score">{{ m4.score1 }}</span>
+                        </div>
+                        <div class="team {{ m4.score2 > m4.score1 ? 'winner' : '' }}">
+                            {{ m4.equipe2.nom }} <span class="score">{{ m4.score2 }}</span>
+                        </div>
+                        <div class="label">Match 4</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Colonne round2 -->
+        <div class="column">
+            {% if m5 %}
+                <div class="match round2">
+                    <div class="column">
+                        <div class="team {{ m5.score1 > m5.score2 ? 'winner' : '' }}">
+                            {{ m5.equipe1.nom }} <span class="score">{{ m5.score1 }}</span>
+                        </div>
+                        <div class="team {{ m5.score2 > m5.score1 ? 'winner' : '' }}">
+                            {{ m5.equipe2.nom }} <span class="score">{{ m5.score2 }}</span>
+                        </div>
+                        <div class="label">Match 5</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if m6 %}
+                <div class="match round2">
+                    <div class="column">
+                        <div class="team {{ m6.score1 > m6.score2 ? 'winner' : '' }}">
+                            {{ m6.equipe1.nom }} <span class="score">{{ m6.score1 }}</span>
+                        </div>
+                        <div class="team {{ m6.score2 > m6.score1 ? 'winner' : '' }}">
+                            {{ m6.equipe2.nom }} <span class="score">{{ m6.score2 }}</span>
+                        </div>
+                        <div class="label">Match 6</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    </div>
+
+
+<form id="refresh-form" style="margin-top: 40px; text-align: center;">
+    <button type="button" id="refresh-button" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">
+        Mettre à jour les valeurs
+    </button>
+</form>
+
+ <script>
+    document.getElementById('refresh-button').addEventListener('click', function refreshScores() {
+        fetch('{{ path("tournoi_classement8", {"id": tab.id}) }}?_=' + new Date().getTime(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Erreur réseau');
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newScores = doc.querySelector('#scores');
+                const oldScores = document.querySelector('#scores');
+
+                if (newScores && oldScores) {
+                    oldScores.innerHTML = newScores.innerHTML;
+                } else {
+                    console.error('Élément #scores introuvable');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour :', error);
+            });
+    });
+</script>
+
+
+</body>
+</html>
