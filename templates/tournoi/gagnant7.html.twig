@@ -239,33 +239,39 @@
         </div>
 
         <!-- Round 2 -->
+        {% if m5 %}
         <div class="round round2">
             <div class="match">
                 <div class="column">
                     <div class="team">{{ m5.equipe1.nom}} <span class="score">{{ m5.score1 }}</span></div>
                     <div class="team">{{ m5.equipe2.nom}} <span class="score">{{ m5.score2 }}</span></div>
-                    <div class="label">Demi-finale 1</div>
+                    <div class="label">m5</div>
                 </div>
             </div>
+
+            {% endif %}
+            {% if m4 %}
             <div class="match">
                 <div class="column">
                     <div class="team"> {{ m4.equipe1.nom}}<span class="score">{{ m4.score1 }}</span></div>
                     <div class="team"> {{ m4.equipe2.nom}}<span class="score">{{ m4.score2 }}</span></div>
-                    <div class="label">Demi-finale 2</div>
+                    <div class="label">m4</div>
                 </div>
             </div>
+            {% endif %}
         </div>
-
+        {% if m11 %}
         <!-- Round 3 -->
         <div class="round round3">
             <div class="match">
                 <div class="column">
                     <div class="team">{{ m11.equipe1.nom }} <span class="score">{{ m11.score1 }}</span></div>
                     <div class="team">{{ m11.equipe2.nom }} <span class="score">{{ m11.score2 }}</span></div>
-                    <div class="label">Finale</div>
+                    <div class="label">m11</div>
                 </div>
             </div>
         </div>
+
 
     </div>
 
@@ -289,10 +295,10 @@
         </div>
     </div>
 </div>
-
+{% endif %}
 <!-- Nouvelle section élimination -->
 <div class="elimination">
-
+    {% if m7 and m6 and m8 %}
     <!-- Round 1 dans élimination -->
     <div class="round round11">
         <div class="match">
@@ -361,8 +367,48 @@
             {% endif %}
         </div>
     </div>
+    {% endif %}
 
 </div>
+<form id="refresh-form" style="margin-top: 40px; text-align: center;">
+    <button type="button" id="refresh-button" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">
+        Mettre à jour les valeurs
+    </button>
+</form>
+
+<script>
+    document.getElementById('refresh-button').addEventListener('click', function () {
+        fetch('{{ path("tournoiafficher_apres_midi7", {"id": poule.id}) }}?_=' + new Date().getTime(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Erreur réseau');
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newBody = doc.querySelector('body');
+                if (newBody) {
+                    document.body.innerHTML = newBody.innerHTML;
+
+                    // ⚠️ Très important : Réattacher le listener au nouveau bouton
+                    const newButton = document.getElementById('refresh-button');
+                    if (newButton) {
+                        newButton.addEventListener('click', arguments.callee);
+                    }
+                } else {
+                    console.error('Body introuvable dans la réponse');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour :', error);
+            });
+    });
+</script>
 
 </body>
 </html>

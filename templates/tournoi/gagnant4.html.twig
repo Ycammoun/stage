@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Tournoi - Poule de 4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            padding: 0px 20px 100px 20px;
+            margin-bottom: 200px;
+        }
+
+        .bracket {
+            display: flex;
+            flex-direction: row;
+            gap: 100px;
+            align-items: flex-start;
+            margin-bottom: 500px;
+        }
+
+        .match {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative;
+        }
+
+        .team {
+            width: 200px;
+            border: 2px solid black;
+            padding: 10px;
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .winner {
+            background-color: #a9e4b7;
+        }
+
+        .label {
+            font-size: 12px;
+            background: black;
+            color: yellow;
+            padding: 4px 8px;
+            text-align: center;
+            align-self: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        .round1 {
+            margin-left: 0;
+            margin-bottom: -50px;
+            margin-top: 100px;
+        }
+
+        .round2 {
+            margin-left: 0;
+            margin-bottom: -50px;
+            margin-top: 100px;
+        }
+
+        .score {
+            color: yellow;
+            border: 1px solid black;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: #000;
+            font-weight: bold;
+        }
+
+        .team::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 2px;
+            height: 50%;
+            background: black;
+            transform: translateX(-100%) translateY(-50%);
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="text-align: center;">Tournoi - Poule de 4</h2>
+
+<!-- Bloc remplaçable par AJAX -->
+<div id="scores">
+    <div class="bracket">
+        <!-- Colonne de matchs -->
+        <div class="column">
+            {% if m1 %}
+                <div class="match round1">
+                    <div class="column">
+                        <div class="team {{ m1.score1 > m1.score2 ? 'winner' : '' }}">
+                            {{ m1.equipe1.nom }} <span class="score">{{ m1.score1 }}</span>
+                        </div>
+                        <div class="team {{ m1.score2 > m1.score1 ? 'winner' : '' }}">
+                            {{ m1.equipe2.nom }} <span class="score">{{ m1.score2 }}</span>
+                        </div>
+                        <div class="label">Match 1</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if m2 %}
+                <div class="match round1">
+                    <div class="column">
+                        <div class="team {{ m2.score1 > m2.score2 ? 'winner' : '' }}">
+                            {{ m2.equipe1.nom }} <span class="score">{{ m2.score1 }}</span>
+                        </div>
+                        <div class="team {{ m2.score2 > m2.score1 ? 'winner' : '' }}">
+                            {{ m2.equipe2.nom }} <span class="score">{{ m2.score2 }}</span>
+                        </div>
+                        <div class="label">Match 2</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Colonne de classement -->
+        {% if m1 and m2 %}
+            {% set classement = [
+                {'equipe': m1.score1 > m1.score2 ? m1.equipe1 : m1.equipe2, 'rang': 1},
+                {'equipe': m1.score1 < m1.score2 ? m1.equipe1 : m1.equipe2, 'rang': 2},
+                {'equipe': m2.score1 > m2.score2 ? m2.equipe1 : m2.equipe2, 'rang': 3},
+                {'equipe': m2.score1 < m2.score2 ? m2.equipe1 : m2.equipe2, 'rang': 4}
+            ] %}
+
+            <div class="match round2">
+                <div class="column">
+                    {% for item in classement %}
+                        <div class="team winner">
+                            {{ item.rang }}. {{ item.equipe.nom }}
+                        </div>
+                    {% endfor %}
+                    <div class="label">Classement</div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Bouton de mise à jour -->
+<form id="refresh-form" style="margin-top: 40px; text-align: center;">
+    <button type="button" id="refresh-button" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">
+        Mettre à jour les valeurs
+    </button>
+</form>
+
+<!-- Script AJAX qui met à jour uniquement le contenu de la div #scores -->
+<script>
+    document.getElementById('refresh-button').addEventListener('click', function refreshScores() {
+        fetch('{{ path("tournoiafficher_apres_midi4", {"id": poule.id}) }}?_=' + new Date().getTime(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Erreur réseau');
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newScores = doc.querySelector('#scores');
+                const oldScores = document.querySelector('#scores');
+
+                if (newScores && oldScores) {
+                    oldScores.innerHTML = newScores.innerHTML;
+                } else {
+                    console.error('Élément #scores introuvable');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour :', error);
+            });
+    });
+</script>
+
+</body>
+</html>

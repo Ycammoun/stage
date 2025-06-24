@@ -377,7 +377,158 @@ final class TournoiController extends AbstractController
             'm7' => $m7,*/
         ]);
     }
+    #[Route('/apresmidi7/{id}', name: 'afficher_apres_midi7', methods: ['GET'])]
+    public function afficherMatchsApresMidi7(Win $win, int $id, EntityManagerInterface $entityManager): Response
+    {
+        $poule = $entityManager->getRepository(Poule::class)->find($id);
 
+        if (!$poule) {
+            throw $this->createNotFoundException('Poule non trouvée');
+        }
+
+        // Récupère tous les matchs de bracket déjà existants pour cette poule
+        $matchsApresMidi = $entityManager->getRepository(Partie::class)->findBy([
+            'poule' => $poule,
+            'bracket' => true,
+        ]);
+
+        // On va chercher les matchs par leur identifiant logique ou par leur ordre (selon ta logique)
+        // Si tu peux ajouter un champ "numMatch" dans Partie, ce serait encore mieux pour retrouver directement
+        // Sinon on part sur l’ordre actuel (mais non fiable)
+        $m1 = $matchsApresMidi[0] ?? null;
+        $m2 = $matchsApresMidi[1] ?? null;
+        $m3 = $matchsApresMidi[2] ?? null;
+        $m4 = $matchsApresMidi[3] ?? null;
+        $m5 = $matchsApresMidi[4] ?? null;
+        $m6 = $matchsApresMidi[5] ?? null;
+        $m7 = $matchsApresMidi[6] ?? null;
+        $m8 = $matchsApresMidi[7] ?? null;
+        $m11 = $matchsApresMidi[8] ?? null;
+
+        // --- Création de m5 si m1 est validé et m5 n'existe pas ---
+        if ($m1 && $m1->isValideParAdversaire() && !$m5) {
+            $m5 = new Partie();
+            $m5->setEquipe1($poule->getEquipes()[0] ?? null);
+            $m5->setEquipe2($this->getGagnant($m1));
+            $m5->setPoule($poule);
+            $m5->setEnCours(false);
+            $m5->setScore1(0);
+            $m5->setScore2(0);
+            $m5->setIsValideParAdversaire(false);
+            $m5->setBracket(true);
+            $entityManager->persist($m5);
+        }
+
+        // --- Création de m4 et m7 si m2 et m3 sont validés et m4/m7 n'existent pas ---
+        if ($m2 && $m3 && $m2->isValideParAdversaire() && $m3->isValideParAdversaire()) {
+            if (!$m4) {
+                $m4 = new Partie();
+                $m4->setEquipe1($this->getGagnant($m2));
+                $m4->setEquipe2($this->getGagnant($m3));
+                $m4->setPoule($poule);
+                $m4->setEnCours(false);
+                $m4->setScore1(0);
+                $m4->setScore2(0);
+                $m4->setIsValideParAdversaire(false);
+                $m4->setBracket(true);
+                $entityManager->persist($m4);
+            }
+            if (!$m7) {
+                $m7 = new Partie();
+                $m7->setEquipe1($this->getPerdant($m2));
+                $m7->setEquipe2($this->getPerdant($m3));
+                $m7->setPoule($poule);
+                $m7->setEnCours(false);
+                $m7->setScore1(0);
+                $m7->setScore2(0);
+                $m7->setIsValideParAdversaire(false);
+                $m7->setBracket(true);
+                $entityManager->persist($m7);
+            }
+        }
+
+        // --- Création de m11 (finale) et m6 (match classement) si m4 et m5 validés et m11/m6 n'existent pas ---
+        if ($m4 && $m5 && $m4->isValideParAdversaire() && $m5->isValideParAdversaire()) {
+            if (!$m11) {
+                $m11 = new Partie();
+                $m11->setEquipe1($this->getGagnant($m4));
+                $m11->setEquipe2($this->getGagnant($m5));
+                $m11->setPoule($poule);
+                $m11->setEnCours(false);
+                $m11->setScore1(0);
+                $m11->setScore2(0);
+                $m11->setIsValideParAdversaire(false);
+                $m11->setBracket(true);
+                $entityManager->persist($m11);
+            }
+            if (!$m6) {
+                $m6 = new Partie();
+                $m6->setEquipe1($this->getPerdant($m4));
+                $m6->setEquipe2($this->getPerdant($m5));
+                $m6->setPoule($poule);
+                $m6->setEnCours(false);
+                $m6->setScore1(0);
+                $m6->setScore2(0);
+                $m6->setIsValideParAdversaire(false);
+                $m6->setBracket(true);
+                $entityManager->persist($m6);
+            }
+        }
+
+        // --- Création de m8 si m1 et m7 validés et m8 n'existe pas ---
+        if ($m1 && $m7 && $m1->isValideParAdversaire() && $m7->isValideParAdversaire() && !$m8) {
+            $m8 = new Partie();
+            $m8->setEquipe1($this->getPerdant($m1));
+            $m8->setEquipe2($this->getGagnant($m7));
+            $m8->setPoule($poule);
+            $m8->setEnCours(false);
+            $m8->setScore1(0);
+            $m8->setScore2(0);
+            $m8->setIsValideParAdversaire(false);
+            $m8->setBracket(true);
+            $entityManager->persist($m8);
+        }
+
+        // Enregistre toutes les modifications / créations en une fois
+        $entityManager->flush();
+
+        return $this->render('tournoi/gagnant7.html.twig', [
+            'poule' => $poule,
+            'm1' => $m1,
+            'm2' => $m2,
+            'm3' => $m3,
+            'm4' => $m4,
+            'm5' => $m5,
+            'm6' => $m6,
+            'm7' => $m7,
+            'm8' => $m8,
+            'm11' => $m11,
+        ]);
+    }
+
+    #[Route('/apresmidi4/{id}', name: 'afficher_apres_midi4', methods: ['GET'])]
+    public function afficherMatchsApresMidi4(Win $win, int $id, EntityManagerInterface $entityManager): Response
+    {
+        $poule = $entityManager->getRepository(Poule::class)->find($id);
+
+        if (!$poule) {
+            throw $this->createNotFoundException('Poule non trouvée');
+        }
+
+        // Récupère tous les matchs de bracket déjà existants pour cette poule
+        $matchsApresMidi = $entityManager->getRepository(Partie::class)->findBy([
+            'poule' => $poule,
+            'bracket' => true,
+        ]);
+
+        $m1 = $matchsApresMidi[0] ?? null;
+        $m2 = $matchsApresMidi[1] ?? null;
+        return $this->render('tournoi/gagnant4.html.twig', [
+            'poule' => $poule,
+            'm1' => $m1,
+            'm2' => $m2,
+        ]);
+    }
 
     #[Route('/gagnant/{id}', name: 'gagnant')]
     public function generateTournament(Win $win, EntityManagerInterface $entityManager, int $id): Response
@@ -449,6 +600,36 @@ final class TournoiController extends AbstractController
 
             $entityManager->flush();
         }
+        else if (count($gagnant)===4){
+            $m1 = new Partie();
+            $m1->setEquipe1($gagnant[0]);
+            $m1->setEquipe2($gagnant[1]);
+            $m1->setPoule($poule);
+            $m1->setEnCours(true);
+            $m1->setBracket(true);
+            $m1->setScore1(0);
+            $m1->setScore2(0);
+            $m1->setIsValideParAdversaire(false);
+            $entityManager->persist($m1);
+            $m2 = new Partie();
+            $m2->setEquipe1($gagnant[2]);
+            $m2->setEquipe2($gagnant[3]);
+            $m2->setPoule($poule);
+            $m2->setEnCours(true);
+            $m2->setBracket(true);
+            $m2->setScore1(0);
+            $m2->setScore2(0);
+            $m2->setIsValideParAdversaire(false);
+            $entityManager->persist($m2);
+            $entityManager->flush();
+            return $this->render('tournoi/gagnant4.html.twig', [
+                'gagnant'=>$gagnant,
+                'poule' => $poule,
+                'm1' => $m1,
+                'm2' => $m2,
+            ]);
+
+        }
         else if(count($gagnant) === 6){
             $m1 = new Partie();
             $m1->setEquipe1($gagnant[3]);
@@ -491,93 +672,34 @@ final class TournoiController extends AbstractController
             $m1->setEquipe1($gagnant[3]);
             $m1->setEquipe2($gagnant[4]);
             $m1->setPoule($poule);
+            $m1->setBracket(true);
             $m1->setEnCours(false);
-            $m1->setScore1(13);
-            $m1->setScore2(22);
-            $m1->setIsValideParAdversaire(true);
+            $m1->setScore1(0);
+            $m1->setScore2(0);
+            $m1->setIsValideParAdversaire(false);
             $entityManager->persist($m1);
             $m2= new Partie();
             $m2->setEquipe1($gagnant[2]);
             $m2->setEquipe2($gagnant[5]);
             $m2->setPoule($poule);
+            $m2->setBracket(true);
             $m2->setEnCours(false);
-            $m2->setScore1(12);
-            $m2->setScore2(22);
-            $m2->setIsValideParAdversaire(true);
+            $m2->setScore1(0);
+            $m2->setScore2(0);
+            $m2->setIsValideParAdversaire(false);
             $entityManager->persist($m2);
             $m3= new Partie();
             $m3->setEquipe1($gagnant[1]);
             $m3->setEquipe2($gagnant[6]);
             $m3->setPoule($poule);
+            $m3->setBracket(true);
             $m3->setEnCours(false);
-            $m3->setScore1(12);
-            $m3->setScore2(22);
-            $m3->setIsValideParAdversaire(true);
+            $m3->setScore1(0);
+            $m3->setScore2(0);
+            $m3->setIsValideParAdversaire(false);
             $entityManager->persist($m3);
-            if ($m1->isValideParAdversaire()) {
-                $m5= new Partie();
-                $m5->setEquipe1($gagnant[0]);
-                $m5->setEquipe2($this->getGagnant($m1));
-                $m5->setPoule($poule);
-                $m5->setEnCours(false);
-                $m5->setScore1(12);
-                $m5->setScore2(22);
-                $m5->setIsValideParAdversaire(true);
-                $entityManager->persist($m5);
 
-            }
-            if($m2->isValideParAdversaire()&&$m3->isValideParAdversaire()){
-                $m4= new Partie();
-                $m4->setEquipe1($this->getGagnant($m2));
-                $m4->setEquipe2($this->getGagnant($m3));
-                $m4->setPoule($poule);
-                $m4->setEnCours(false);
-                $m4->setScore1(12);
-                $m4->setScore2(22);
-                $m4->setIsValideParAdversaire(true);
-                $entityManager->persist($m4);
-                $m7=new Partie();
-                $m7->setEquipe1($this->getPerdant($m2));
-                $m7->setEquipe2($this->getPerdant($m3));
-                $m7->setPoule($poule);
-                $m7->setEnCours(false);
-                $m7->setScore1(12);
-                $m7->setScore2(22);
-                $m7->setIsValideParAdversaire(true);
-                $entityManager->persist($m4);
-            }
-            if ($m5->isValideParAdversaire()&&$m4->isValideParAdversaire()) {
-                $m11= new Partie();
-                $m11->setEquipe1($this->getGagnant($m4));
-                $m11->setEquipe2($this->getGagnant($m5));
-                $m11->setPoule($poule);
-                $m11->setEnCours(false);
-                $m11->setScore1(12);
-                $m11->setScore2(22);
-                $m11->setIsValideParAdversaire(true);
-                $entityManager->persist($m11);
-                $m6= new Partie();
-                $m6->setEquipe1($this->getPerdant($m4));
-                $m6->setEquipe2($this->getPerdant($m5));
-                $m6->setPoule($poule);
-                $m6->setEnCours(false);
-                $m6->setScore1(12);
-                $m6->setScore2(22);
-                $m6->setIsValideParAdversaire(true);
-                $entityManager->persist($m6);
-            }
-            if ($m1->isValideParAdversaire() && $m7->isValideParAdversaire()) {
-                $m8= new Partie();
-                $m8->setEquipe1($this->getPerdant($m1));
-                $m8->setEquipe2($this->getGagnant($m7));
-                $m8->setPoule($poule);
-                $m8->setEnCours(false);
-                $m8->setScore1(12);
-                $m8->setScore2(22);
-                $m8->setIsValideParAdversaire(true);
-                $entityManager->persist($m8);
-
-            }
+            $entityManager->flush();
             return $this->render('tournoi/gagnant7.html.twig', [
                 'gagnant' => $gagnant,
                 'poule' => $poule,
