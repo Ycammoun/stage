@@ -851,6 +851,7 @@ final class TournoiController extends AbstractController
     }
 
 
+
 // Fonction utilitaire à ajouter dans le contrôleur
     private function findMatchIfExists(EntityManagerInterface $em, Equipe $e1, Equipe $e2): ?Partie
     {

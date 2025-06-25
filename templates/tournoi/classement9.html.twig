@@ -197,7 +197,7 @@
         </div>
     </div>
 
-    </div>
+</div>
 
 
 <form id="refresh-form" style="margin-top: 40px; text-align: center;">
@@ -206,7 +206,7 @@
     </button>
 </form>
 
- <script>
+<script>
     document.getElementById('refresh-button').addEventListener('click', function refreshScores() {
         fetch('{{ path("tournoi_classement8", {"id": tab.id}) }}?_=' + new Date().getTime(), {
             headers: {
